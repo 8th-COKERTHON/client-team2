@@ -75,20 +75,39 @@ function SuccessIcon() {
   );
 }
 
-function ChecklistCompleteMark() {
+function ChecklistNumberMark() {
   return (
     <svg
       viewBox="0 0 38 37"
-      className="absolute -top-1.5 -left-3 size-[38px] text-main"
+      className="pointer-events-none absolute top-1/2 left-1/2 size-[38px] -translate-x-1/2 -translate-y-1/2 text-main"
       aria-hidden="true"
     >
       <path
-        d="M8.6 28.4C4.1 23.8 4.7 15.3 10.1 10.5C15.7 5.5 25.2 6 29.2 12.4C32.8 18.2 29.7 26.8 23.2 30.1C16.7 33.3 8.3 31.2 5.3 24.9M8.7 20.3C10.5 22.4 12.5 24.2 14.7 26C19.7 19.8 24.7 13.8 30.3 8.2"
+        d="M8.6 28.4C4.1 23.8 4.7 15.3 10.1 10.5C15.7 5.5 25.2 6 29.2 12.4C32.8 18.2 29.7 26.8 23.2 30.1C16.7 33.3 8.3 31.2 5.3 24.9"
         fill="none"
         stroke="currentColor"
         strokeWidth="2.4"
         strokeLinecap="round"
         strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ChecklistTextUnderline() {
+  return (
+    <svg
+      viewBox="0 0 110 8"
+      preserveAspectRatio="none"
+      className="pointer-events-none absolute right-0 bottom-[6px] left-0 h-2 text-main"
+      aria-hidden="true"
+    >
+      <path
+        d="M1 5.2C16.8 3.5 33.9 3.1 48.5 3.7C65.7 4.4 82.3 2.4 109 3.2"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
       />
     </svg>
   );
@@ -213,16 +232,19 @@ export function LinkDetailPage() {
       key={item.id}
       className="relative flex min-h-[30px] items-center justify-between text-[16px] leading-[1.5] font-medium"
     >
-      {item.isCompleted ? <ChecklistCompleteMark /> : null}
       <button
         type="button"
         onClick={() => handleToggleChecklistItem(item.id)}
-        className={`relative min-w-0 flex-1 text-left ${
-          item.isCompleted ? "text-[#1c1c1a] line-through" : "text-[#1c1c1a]"
-        }`}
+        className="relative min-w-0 flex-1 text-left text-[#1c1c1a]"
       >
-        <span className="mr-1">{index + 1}.</span>
-        {item.title}
+        <span className="relative mr-1 inline-flex min-w-5 justify-center">
+          {item.isCompleted ? <ChecklistNumberMark /> : null}
+          <span className="relative">{index + 1}.</span>
+        </span>
+        <span className="relative inline-block">
+          {item.title}
+          {item.isCompleted ? <ChecklistTextUnderline /> : null}
+        </span>
       </button>
       {item.isCompleted ? (
         <span className="ml-3 shrink-0 text-[20px] leading-[1.5] font-normal tracking-[-0.6px] text-main">
