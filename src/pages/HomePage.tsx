@@ -1,15 +1,11 @@
+import { useState } from "react";
 import { Link } from "react-router";
 
+import emptyCharacter from "@/assets/icons/character2.png";
 import { ROUTES } from "@/constants/routes";
-import { MOCK_BOOKMARKS, MOCK_TAGS } from "@/features/link/api/mockLinks";
+import { getStoredBookmarks } from "@/features/link/api/localBookmarkStorage";
 import type { Bookmark, Tag } from "@/features/link/types";
 
-const TODAY_ARCHIVE_ITEMS = MOCK_BOOKMARKS.slice(0, 2);
-const COLLECTION_TAGS = [
-  ...MOCK_TAGS,
-  { id: "tag-3", name: "태그3" },
-  { id: "tag-4", name: "태그4" },
-] satisfies Tag[];
 const HOME_TAGS = ["tag-1", "tag-2", "tag-3"];
 
 function SearchIcon() {
@@ -126,7 +122,7 @@ function ArchiveCard({ bookmark }: ArchiveCardProps) {
 }
 
 type CollectionCardProps = {
-  tag: Tag;
+  tag: Tag & { count: number };
   count: number;
   sample: Bookmark;
 };
@@ -181,8 +177,55 @@ function CollectionCard({ tag, count, sample }: CollectionCardProps) {
   );
 }
 
+type EmptyStateProps = {
+  message: string;
+  className?: string;
+};
+
+function EmptyState({ message, className = "" }: EmptyStateProps) {
+  return (
+    <div className={`flex flex-col items-center justify-center ${className}`}>
+      <img
+        src={emptyCharacter}
+        alt=""
+        className="h-[133px] w-[117px] object-contain"
+      />
+      <p className="text-[14px] leading-[1.5] font-semibold text-grayscale-300">
+        {message}
+      </p>
+    </div>
+  );
+}
+
 export function HomePage() {
-  const sampleBookmark = MOCK_BOOKMARKS[0];
+  const [bookmarks] = useState<Bookmark[]>(() => getStoredBookmarks());
+  const todayArchiveItems = bookmarks.slice(0, 2);
+  const hasBookmarks = bookmarks.length > 0;
+  const tagMap = new Map<string, Tag & { count: number }>();
+
+  bookmarks.forEach((bookmark) => {
+    bookmark.tags.forEach((tag) => {
+      const currentTag = tagMap.get(tag.id);
+
+      if (currentTag) {
+        tagMap.set(tag.id, { ...currentTag, count: currentTag.count + 1 });
+        return;
+      }
+
+      tagMap.set(tag.id, { ...tag, count: 1 });
+    });
+  });
+
+  const collectionTags = Array.from(tagMap.values());
+  const bookmarkByTagId = collectionTags.reduce<Record<string, Bookmark | undefined>>(
+    (result, tag) => ({
+      ...result,
+      [tag.id]: bookmarks.find((bookmark) =>
+        bookmark.tags.some((bookmarkTag) => bookmarkTag.id === tag.id),
+      ),
+    }),
+    {},
+  );
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-[430px] bg-grayscale-000 pb-[140px] text-grayscale-900">
@@ -221,11 +264,18 @@ export function HomePage() {
               Today’s Archive
             </h1>
           </div>
-          <div className="mt-[15px] flex gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {TODAY_ARCHIVE_ITEMS.map((bookmark) => (
-              <ArchiveCard key={bookmark.id} bookmark={bookmark} />
-            ))}
-          </div>
+          {todayArchiveItems.length > 0 ? (
+            <div className="mt-[15px] flex gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {todayArchiveItems.map((bookmark) => (
+                <ArchiveCard key={bookmark.id} bookmark={bookmark} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              message="추천 할 일이 없어요."
+              className="mx-5 mt-[15px] h-[180px]"
+            />
+          )}
         </section>
 
         <section className="mt-5 px-5">
@@ -242,16 +292,31 @@ export function HomePage() {
             </button>
           </div>
 
-          <div className="mt-[15px] grid grid-cols-2 gap-x-[15px] gap-y-[15px]">
-            {COLLECTION_TAGS.map((tag) => (
-              <CollectionCard
-                key={tag.id}
-                tag={tag}
-                count={4}
-                sample={sampleBookmark}
-              />
-            ))}
-          </div>
+          {hasBookmarks && collectionTags.length > 0 ? (
+            <div className="mt-[15px] grid grid-cols-2 gap-x-[15px] gap-y-[15px]">
+              {collectionTags.map((tag) => {
+                const sampleBookmark = bookmarkByTagId[tag.id];
+
+                if (!sampleBookmark) {
+                  return null;
+                }
+
+                return (
+                  <CollectionCard
+                    key={tag.id}
+                    tag={tag}
+                    count={tag.count}
+                    sample={sampleBookmark}
+                  />
+                );
+              })}
+            </div>
+          ) : (
+            <EmptyState
+              message="북마크한 링크가 없어요."
+              className="mt-[15px] h-[308px]"
+            />
+          )}
         </section>
       </div>
     </main>

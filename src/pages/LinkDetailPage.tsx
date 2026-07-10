@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router";
 import { AppTopBar, MoreIcon } from "@/components/ui/AppTopBar";
 import { MobileScreen } from "@/components/ui/MobileScreen";
 import { ROUTES } from "@/constants/routes";
+import { getStoredBookmark } from "@/features/link/api/localBookmarkStorage";
 import { getMockBookmarkDetail } from "@/features/link/api/mockLinks";
 import { TagBadge } from "@/features/link/components/TagBadge";
 import type { ChecklistItem } from "@/features/link/types";
@@ -39,7 +40,8 @@ function AddIcon() {
 
 export function LinkDetailPage() {
   const { linkId } = useParams();
-  const bookmark = getMockBookmarkDetail(linkId ?? "");
+  const bookmark =
+    getStoredBookmark(linkId ?? "") ?? getMockBookmarkDetail(linkId ?? "");
   const [checklist, setChecklist] = useState<ChecklistItem[]>(
     () => bookmark?.checklist ?? [],
   );

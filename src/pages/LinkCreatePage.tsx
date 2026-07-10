@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 import { AppTopBar, MoreIcon } from "@/components/ui/AppTopBar";
 import { MobileScreen } from "@/components/ui/MobileScreen";
 import { ROUTES } from "@/constants/routes";
+import { createStoredBookmark } from "@/features/link/api/localBookmarkStorage";
 
 const MAX_TAG_COUNT = 5;
 const INITIAL_TAGS = ["개발", "학업"];
@@ -123,7 +124,13 @@ export function LinkCreatePage() {
       return;
     }
 
-    // TODO: Replace this local completion flow with createBookmark API integration.
+    createStoredBookmark({
+      title,
+      url,
+      reminderDate,
+      reminderTime,
+      tags,
+    });
     navigate(ROUTES.home);
   };
 

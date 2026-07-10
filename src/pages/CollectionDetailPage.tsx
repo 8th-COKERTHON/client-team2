@@ -3,18 +3,29 @@ import { useParams } from "react-router";
 
 import { AppTopBar, MoreIcon } from "@/components/ui/AppTopBar";
 import { MobileScreen } from "@/components/ui/MobileScreen";
+import {
+  getStoredBookmarks,
+  getStoredBookmarksByTag,
+} from "@/features/link/api/localBookmarkStorage";
 import { BookmarkCard } from "@/features/link/components/BookmarkCard";
-import { getMockCollectionDetail } from "@/features/link/api/mockLinks";
 
 export function CollectionDetailPage() {
   const { tagId } = useParams();
   const [isEditMode, setIsEditMode] = useState(false);
-  const collection = getMockCollectionDetail(tagId ?? "");
+  const bookmarks = getStoredBookmarksByTag(tagId ?? "");
+  const isCurrentTag = (storedTagId: string): boolean =>
+    storedTagId === tagId || decodeURIComponent(storedTagId) === tagId;
+  const tagName =
+    bookmarks[0]?.tags.find((tag) => isCurrentTag(tag.id))?.name ??
+    getStoredBookmarks()
+      .flatMap((bookmark) => bookmark.tags)
+      .find((tag) => isCurrentTag(tag.id))?.name ??
+    decodeURIComponent(tagId ?? "태그");
 
   return (
     <MobileScreen>
       <AppTopBar
-        title={collection.tag.name}
+        title={tagName}
         rightSlot={
           <button
             type="button"
@@ -28,7 +39,7 @@ export function CollectionDetailPage() {
       />
 
       <section className="grid grid-cols-2 gap-x-[13px] gap-y-3 px-5 pt-5 pb-6">
-        {collection.bookmarks.map((bookmark) => (
+        {bookmarks.map((bookmark) => (
           <BookmarkCard
             key={bookmark.id}
             bookmark={bookmark}
