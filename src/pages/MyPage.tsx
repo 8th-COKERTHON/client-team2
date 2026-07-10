@@ -1,12 +1,12 @@
 import { MobileScreen } from "@/components/ui/MobileScreen";
-import { getMockUserSummary } from "@/features/user/api/mockUserSummary";
 import { GradeCriteriaList } from "@/features/user/components/GradeCriteriaList";
 import { GradeSummaryCard } from "@/features/user/components/GradeSummaryCard";
 import { UserStatCards } from "@/features/user/components/UserStatCards";
+import { useUserSummary } from "@/features/user/hooks/useUserSummary";
 import { resolveCurrentGrade } from "@/features/user/utils";
 
 export function MyPage() {
-  const userSummary = getMockUserSummary();
+  const { userSummary } = useUserSummary();
   const currentGrade = resolveCurrentGrade(
     userSummary.totalScore,
     userSummary.level,
