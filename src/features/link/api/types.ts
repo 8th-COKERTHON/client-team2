@@ -19,6 +19,7 @@ export type BookmarkResponse = {
   remindAt?: string;
   isActive: boolean;
   tags: TagResponse[];
+  checklists?: ChecklistResponse[];
   createdAt: string;
   updatedAt: string;
 };
@@ -51,4 +52,9 @@ export type BookmarkDetailResponse = {
   totalScore: number;
   tags: TagResponse[];
   checklists: ChecklistResponse[];
+};
+
+export type TagFilterResponse = {
+  tagName: string;
+  bookmarks: BookmarkResponse[];
 };

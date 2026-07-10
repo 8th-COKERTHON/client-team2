@@ -1,5 +1,8 @@
 import type { Bookmark } from "@/features/link/types";
-import type { BookmarkDetailResponse } from "@/features/link/api/types";
+import type {
+  BookmarkDetailResponse,
+  BookmarkResponse,
+} from "@/features/link/api/types";
 
 export function createReminderDateTime(
   reminderDate: string,
@@ -36,6 +39,29 @@ export function mapBookmarkDetailResponseToBookmark(
       title: checklist.content,
       isCompleted: checklist.isChecked,
     })),
+  };
+}
+
+export function mapBookmarkResponseToBookmark(response: BookmarkResponse): Bookmark {
+  return {
+    id: String(response.bookmarkId),
+    title: response.title,
+    url: response.url,
+    domain: getDomainFromUrl(response.url),
+    purpose: response.title,
+    reminderAt: response.remindAt ?? "",
+    score: 0,
+    viewedAt: response.visitedAt,
+    tags: response.tags.map((tag) => ({
+      id: tag.name,
+      name: tag.name,
+    })),
+    checklist:
+      response.checklists?.map((checklist) => ({
+        id: String(checklist.checklistId),
+        title: checklist.content,
+        isCompleted: checklist.isChecked,
+      })) ?? [],
   };
 }
 

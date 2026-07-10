@@ -4,6 +4,11 @@ import { useParams } from "react-router";
 import { AppTopBar } from "@/components/ui/AppTopBar";
 import { MobileScreen } from "@/components/ui/MobileScreen";
 import {
+  deleteBookmark,
+  getBookmarksByTag,
+  visitBookmark,
+} from "@/features/link/api/bookmarkApi";
+import {
   deleteStoredBookmark,
   getStoredBookmarks,
   getStoredBookmarksByTag,
@@ -11,6 +16,7 @@ import {
 } from "@/features/link/api/localBookmarkStorage";
 import { BookmarkCard } from "@/features/link/components/BookmarkCard";
 import type { Bookmark } from "@/features/link/types";
+import { isServerId, mapBookmarkResponseToBookmark } from "@/features/link/utils";
 
 function TrashIcon() {
   return (
@@ -78,9 +84,13 @@ function getBookmarkDescription(bookmark: Bookmark): string {
 
 export function CollectionDetailPage() {
   const { tagId } = useParams();
+  const decodedTagName = decodeURIComponent(tagId ?? "태그");
   const [isEditMode, setIsEditMode] = useState(false);
   const [bookmarks, setBookmarks] = useState<Bookmark[]>(() =>
     getStoredBookmarksByTag(tagId ?? ""),
+  );
+  const [isLoadingBookmarks, setIsLoadingBookmarks] = useState(() =>
+    Boolean(tagId),
   );
   const [deleteTarget, setDeleteTarget] = useState<Bookmark | null>(null);
   const [showDeleteToast, setShowDeleteToast] = useState(false);
@@ -91,7 +101,7 @@ export function CollectionDetailPage() {
     getStoredBookmarks()
       .flatMap((bookmark) => bookmark.tags)
       .find((tag) => isCurrentTag(tag.id))?.name ??
-    decodeURIComponent(tagId ?? "태그");
+    decodedTagName;
   const sortedBookmarks = useMemo(
     () =>
       [...bookmarks].sort((firstBookmark, secondBookmark) => {
@@ -103,6 +113,41 @@ export function CollectionDetailPage() {
       }),
     [bookmarks],
   );
+
+  useEffect(() => {
+    if (!tagId) {
+      return;
+    }
+
+    const targetTagId = tagId;
+    let isMounted = true;
+
+    async function fetchBookmarksByTag(): Promise<void> {
+      setIsLoadingBookmarks(true);
+
+      try {
+        const response = await getBookmarksByTag(decodedTagName);
+
+        if (isMounted) {
+          setBookmarks(response.bookmarks.map(mapBookmarkResponseToBookmark));
+        }
+      } catch {
+        if (isMounted) {
+          setBookmarks(getStoredBookmarksByTag(targetTagId));
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingBookmarks(false);
+        }
+      }
+    }
+
+    void fetchBookmarksByTag();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [decodedTagName, tagId]);
 
   useEffect(() => {
     if (!showDeleteToast) {
@@ -117,6 +162,26 @@ export function CollectionDetailPage() {
   }, [showDeleteToast]);
 
   const handleOpenBookmark = (bookmarkId: string): void => {
+    if (isServerId(bookmarkId)) {
+      void visitBookmark(bookmarkId).then((visitedBookmarkResponse) => {
+        const visitedBookmark = mapBookmarkResponseToBookmark(
+          visitedBookmarkResponse,
+        );
+
+        setBookmarks((current) =>
+          current.map((bookmark) =>
+            bookmark.id === bookmarkId
+              ? {
+                  ...bookmark,
+                  viewedAt: visitedBookmark.viewedAt ?? new Date().toISOString(),
+                }
+              : bookmark,
+          ),
+        );
+      });
+      return;
+    }
+
     const viewedBookmark = markStoredBookmarkAsViewed(bookmarkId);
 
     if (!viewedBookmark) {
@@ -130,17 +195,26 @@ export function CollectionDetailPage() {
     );
   };
 
-  const handleDeleteBookmark = (): void => {
+  const handleDeleteBookmark = async (): Promise<void> => {
     if (!deleteTarget) {
       return;
     }
 
-    deleteStoredBookmark(deleteTarget.id);
-    setBookmarks((current) =>
-      current.filter((bookmark) => bookmark.id !== deleteTarget.id),
-    );
-    setDeleteTarget(null);
-    setShowDeleteToast(true);
+    try {
+      if (isServerId(deleteTarget.id)) {
+        await deleteBookmark(deleteTarget.id);
+      } else {
+        deleteStoredBookmark(deleteTarget.id);
+      }
+
+      setBookmarks((current) =>
+        current.filter((bookmark) => bookmark.id !== deleteTarget.id),
+      );
+      setDeleteTarget(null);
+      setShowDeleteToast(true);
+    } catch {
+      setDeleteTarget(null);
+    }
   };
 
   return (
@@ -177,15 +251,23 @@ export function CollectionDetailPage() {
       />
 
       <section className="grid grid-cols-2 gap-x-[13px] gap-y-3 px-5 pt-5 pb-[140px]">
-        {sortedBookmarks.map((bookmark) => (
-          <BookmarkCard
-            key={bookmark.id}
-            bookmark={bookmark}
-            isEditMode={isEditMode}
-            onClick={() => handleOpenBookmark(bookmark.id)}
-            onRequestDelete={setDeleteTarget}
-          />
-        ))}
+        {isLoadingBookmarks ? (
+          <p className="col-span-2 py-10 text-center text-[14px] leading-[1.5] font-medium text-grayscale-300">
+            북마크를 불러오는 중이에요.
+          </p>
+        ) : null}
+
+        {!isLoadingBookmarks
+          ? sortedBookmarks.map((bookmark) => (
+              <BookmarkCard
+                key={bookmark.id}
+                bookmark={bookmark}
+                isEditMode={isEditMode}
+                onClick={() => handleOpenBookmark(bookmark.id)}
+                onRequestDelete={setDeleteTarget}
+              />
+            ))
+          : null}
       </section>
 
       {deleteTarget ? (
