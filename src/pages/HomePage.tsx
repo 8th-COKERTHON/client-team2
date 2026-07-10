@@ -88,11 +88,16 @@ function HomeTag({
   );
 }
 
+function getBookmarkDescription(bookmark: Bookmark): string {
+  return bookmark.purpose.trim() || bookmark.title.trim();
+}
+
 type ArchiveCardProps = {
   bookmark: Bookmark;
 };
 
 function ArchiveCard({ bookmark }: ArchiveCardProps) {
+  const description = getBookmarkDescription(bookmark);
   const completedCount = bookmark.checklist.filter((item) => item.isCompleted).length;
   const previewTags =
     bookmark.tags.length > 0
@@ -107,7 +112,7 @@ function ArchiveCard({ bookmark }: ArchiveCardProps) {
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-0.5">
           <h2 className="line-clamp-1 text-[18px] leading-[1.5] font-semibold text-grayscale-800">
-            링크 제목
+            {description}
           </h2>
           <div className="flex items-center gap-1">
             <SiteIcon />
@@ -138,6 +143,7 @@ type CollectionCardProps = {
 };
 
 function CollectionCard({ tag, count, sample }: CollectionCardProps) {
+  const description = getBookmarkDescription(sample);
   const previewTags =
     sample.tags.length > 0
       ? sample.tags.slice(0, 3).map((sampleTag) => sampleTag.name)
@@ -157,7 +163,7 @@ function CollectionCard({ tag, count, sample }: CollectionCardProps) {
             <div className="flex min-w-0 flex-col gap-2">
               <div className="flex min-w-0 flex-col gap-0.5">
                 <p className="line-clamp-1 text-[12.5px] leading-[1.5] font-semibold text-grayscale-800">
-                  링크 제목
+                  {description}
                 </p>
                 <div className="flex min-w-0 items-center gap-1">
                   <SiteIcon className="size-[14px] shrink-0" />
