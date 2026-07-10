@@ -145,6 +145,7 @@ type CollectionCardProps = {
 
 function CollectionCard({ tag, count, sample }: CollectionCardProps) {
   const description = getBookmarkDescription(sample);
+  const completedCount = sample.checklist.filter((item) => item.isCompleted).length;
   const previewTags =
     sample.tags.length > 0
       ? sample.tags.slice(0, 3).map((sampleTag) => sampleTag.name)
@@ -155,40 +156,50 @@ function CollectionCard({ tag, count, sample }: CollectionCardProps) {
       to={ROUTES.collectionDetail(tag.id)}
       className="flex w-[160px] flex-col items-center gap-2"
     >
-      <div className="relative h-[160px] w-full overflow-visible">
-        <div className="absolute top-[19px] left-[18px] h-[86px] w-[119px] rounded-[9px] bg-grayscale-100" />
-        <div className="absolute top-[13px] left-[18px] h-[34px] w-[76px] rounded-t-[9px] bg-grayscale-100" />
+      <div className="relative h-[160px] w-full overflow-hidden">
+        <div className="absolute top-3.5 left-2.5 size-[125px] rounded-lg bg-grayscale-100" />
 
-        <div className="absolute top-0 left-[18px] z-10 size-[125px] rotate-[15deg] rounded-lg bg-grayscale-white p-[11px]">
-          <div className="flex size-full flex-col justify-between">
-            <div className="flex min-w-0 flex-col gap-2">
-              <div className="flex min-w-0 flex-col gap-0.5">
-                <p className="line-clamp-1 text-[12.5px] leading-[1.5] font-semibold text-grayscale-800">
-                  {description}
-                </p>
-                <div className="flex min-w-0 items-center gap-1">
-                  <SiteIcon className="size-[14px] shrink-0" />
-                  <span className="truncate text-[11px] leading-[1.5] font-medium text-grayscale-200">
-                    {sample.domain}
-                  </span>
+        <div className="absolute top-0 left-1 flex size-[153px] items-center justify-center">
+          <div className="size-[125px] rotate-[15deg] overflow-hidden rounded-[8.33px] bg-grayscale-white p-[11px]">
+            <div className="flex size-full flex-col justify-between">
+              <div className="flex min-w-0 flex-col gap-[8.33px]">
+                <div className="flex min-w-0 flex-col gap-[1.39px]">
+                  <p className="line-clamp-1 text-[12.5px] leading-[1.5] font-semibold tracking-[-0.31px] text-grayscale-800">
+                    {description}
+                  </p>
+                  <div className="flex min-w-0 items-center gap-[2.78px]">
+                    <SiteIcon className="size-[13.89px] shrink-0" />
+                    <span className="truncate text-[11.11px] leading-[1.5] font-medium tracking-[-0.28px] text-grayscale-200">
+                      {sample.domain}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex gap-[2.78px] overflow-hidden">
+                  {previewTags.map((sampleTag, index) => (
+                    <HomeTag
+                      key={`${sampleTag}-${index}`}
+                      label={sampleTag}
+                      size="small"
+                    />
+                  ))}
                 </div>
               </div>
-              <div className="flex gap-1 overflow-hidden">
-                {previewTags.map((sampleTag, index) => (
-                  <HomeTag key={`${sampleTag}-${index}`} label={sampleTag} size="small" />
-                ))}
-              </div>
-            </div>
 
-            <div className="flex justify-between text-[8px] leading-[1.5] font-medium text-grayscale-100">
-              <span>0/{sample.checklist.length} 완료</span>
-              <span>2025/02/02</span>
+              <div className="flex justify-between text-[8.33px] leading-[1.5] font-medium tracking-[-0.21px] text-grayscale-100">
+                <span>
+                  {completedCount}/{sample.checklist.length} 완료
+                </span>
+                <span>2025/02/02</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="absolute bottom-[51px] left-0 z-20 h-[31px] w-[86px] rounded-t-[12px] bg-grayscale-050/60 backdrop-blur-[4px]" />
-        <div className="absolute inset-x-0 bottom-0 z-20 h-[84px] rounded-[12px] bg-gradient-to-b from-grayscale-000/55 via-grayscale-050/75 to-grayscale-050/90 shadow-[inset_0_1px_10px_rgba(255,255,255,0.72)] backdrop-blur-[6px]" />
+        <div className="absolute top-[66px] left-0 z-20 h-[94px] w-full overflow-hidden rounded-lg bg-[linear-gradient(180deg,rgba(255,255,255,0.56)_0%,rgba(246,246,246,0.82)_55%,rgba(233,233,233,0.92)_100%)] shadow-[inset_0_1px_10px_rgba(255,255,255,0.85)] backdrop-blur-[6px]">
+          <div className="absolute top-[-28px] left-[31px] h-[70px] w-[76px] rounded-full bg-white/70 blur-[18px]" />
+          <div className="absolute right-[28px] bottom-[13px] h-[30px] w-[65px] rounded-full bg-grayscale-100/35 blur-[12px]" />
+          <div className="absolute bottom-[8px] left-[15px] h-[17px] w-[78px] rounded-full bg-grayscale-100/30 blur-[10px]" />
+        </div>
       </div>
 
       <div className="flex items-center gap-1">
