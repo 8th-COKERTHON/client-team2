@@ -7,4 +7,5 @@ export const ROUTES = {
   signupComplete: "/signup/complete",
   linkCreate: "/links/new",
   myPage: "/my",
+  notifications: "/notifications",
 } as const;

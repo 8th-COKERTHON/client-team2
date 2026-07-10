@@ -5,14 +5,16 @@ import { AuthEntryPage } from "@/pages/AuthEntryPage";
 import { HomePage } from "@/pages/HomePage";
 import { LoginPage } from "@/pages/LoginPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
-import { SignupCompletePage } from "@/pages/SignupCompletePage";
-import { SignupPage } from "@/pages/SignupPage";
+import { NotificationListPage } from "@/pages/notification/NotificationListPage";
 import { SplashPage } from "@/pages/SplashPage";
+import { SignupPage } from "@/pages/SignupPage";
+import { SignupCompletePage } from "@/pages/SignupCompletePage";
 
 export function AppRouter() {
   return (
     <Routes>
       <Route path={ROUTES.home} element={<HomePage />} />
+      <Route path={ROUTES.notifications} element={<NotificationListPage />} />
       <Route path={ROUTES.splash} element={<SplashPage />} />
       <Route path={ROUTES.authEntry} element={<AuthEntryPage />} />
       <Route path={ROUTES.login} element={<LoginPage />} />
