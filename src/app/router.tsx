@@ -4,6 +4,7 @@ import { ROUTES } from "@/constants/routes";
 import { AuthEntryPage } from "@/pages/AuthEntryPage";
 import { CollectionDetailPage } from "@/pages/CollectionDetailPage";
 import { HomePage } from "@/pages/HomePage";
+import { LinkDetailPage } from "@/pages/LinkDetailPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { SignupCompletePage } from "@/pages/SignupCompletePage";
@@ -20,6 +21,7 @@ export function AppRouter() {
       <Route path={ROUTES.signup} element={<SignupPage />} />
       <Route path={ROUTES.signupComplete} element={<SignupCompletePage />} />
       <Route path={ROUTES.collectionDetail(":tagId")} element={<CollectionDetailPage />} />
+      <Route path={ROUTES.linkDetail(":linkId")} element={<LinkDetailPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
