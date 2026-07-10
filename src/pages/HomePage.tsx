@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
 
 import emptyCharacter from "@/assets/icons/character2.png";
@@ -48,6 +48,20 @@ function ArrowRightIcon() {
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-6" aria-hidden="true">
+      <path
+        d="M6 6l12 12M18 6 6 18"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
       />
     </svg>
   );
@@ -131,6 +145,50 @@ function ArchiveCard({ bookmark }: ArchiveCardProps) {
       </div>
 
       <p className="self-end text-[12px] leading-[1.5] font-medium text-grayscale-100">
+        {completedCount}/{bookmark.checklist.length} 완료
+      </p>
+    </Link>
+  );
+}
+
+type SearchResultCardProps = {
+  bookmark: Bookmark;
+};
+
+function SearchResultCard({ bookmark }: SearchResultCardProps) {
+  const description = getBookmarkDescription(bookmark);
+  const completedCount = bookmark.checklist.filter((item) => item.isCompleted).length;
+  const previewTags =
+    bookmark.tags.length > 0
+      ? bookmark.tags.slice(0, 2).map((tag) => tag.name)
+      : DEFAULT_PREVIEW_TAGS.slice(0, 2);
+
+  return (
+    <Link
+      to={ROUTES.linkDetail(bookmark.id)}
+      className="flex size-[161px] shrink-0 flex-col justify-between overflow-hidden rounded-xl bg-grayscale-white p-4"
+    >
+      <div className="flex w-full flex-col gap-3">
+        <div className="flex flex-col gap-0.5">
+          <h2 className="line-clamp-1 text-[18px] leading-[1.5] font-semibold tracking-[-0.45px] text-grayscale-800">
+            {description}
+          </h2>
+          <div className="flex items-center gap-1">
+            <SiteIcon />
+            <span className="truncate text-[16px] leading-[1.5] font-medium tracking-[-0.4px] text-grayscale-200">
+              {bookmark.domain}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-1 overflow-hidden">
+          {previewTags.map((tag, index) => (
+            <HomeTag key={`${tag}-${index}`} label={tag} />
+          ))}
+        </div>
+      </div>
+
+      <p className="self-end text-[12px] leading-[1.5] font-medium tracking-[-0.3px] text-grayscale-100">
         {completedCount}/{bookmark.checklist.length} 완료
       </p>
     </Link>
@@ -234,8 +292,31 @@ function EmptyState({ message, className = "" }: EmptyStateProps) {
   );
 }
 
+function doesBookmarkMatchQuery(bookmark: Bookmark, query: string): boolean {
+  const normalizedQuery = query.trim().toLowerCase();
+
+  if (!normalizedQuery) {
+    return false;
+  }
+
+  const searchableText = [
+    bookmark.title,
+    bookmark.purpose,
+    bookmark.url,
+    bookmark.domain,
+    ...bookmark.tags.map((tag) => tag.name),
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  return searchableText.includes(normalizedQuery);
+}
+
 export function HomePage() {
   const [bookmarks] = useState<Bookmark[]>(() => getStoredBookmarks());
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const todayArchiveItems = bookmarks.slice(0, 2);
   const hasBookmarks = bookmarks.length > 0;
   const tagMap = new Map<string, Tag & { count: number }>();
@@ -254,6 +335,13 @@ export function HomePage() {
   });
 
   const collectionTags = Array.from(tagMap.values());
+  const searchResults = useMemo(
+    () =>
+      isSearchActive
+        ? bookmarks.filter((bookmark) => doesBookmarkMatchQuery(bookmark, searchQuery))
+        : [],
+    [bookmarks, isSearchActive, searchQuery],
+  );
   const bookmarkByTagId = collectionTags.reduce<Record<string, Bookmark | undefined>>(
     (result, tag) => ({
       ...result,
@@ -263,6 +351,23 @@ export function HomePage() {
     }),
     {},
   );
+
+  useEffect(() => {
+    if (!isSearchActive) {
+      return;
+    }
+
+    searchInputRef.current?.focus();
+  }, [isSearchActive]);
+
+  const handleActivateSearch = (): void => {
+    setIsSearchActive(true);
+  };
+
+  const handleCloseSearch = (): void => {
+    setIsSearchActive(false);
+    setSearchQuery("");
+  };
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-[430px] bg-grayscale-000 pb-[140px] text-grayscale-900">
@@ -279,6 +384,7 @@ export function HomePage() {
             <button
               type="button"
               className="flex size-6 items-center justify-center"
+              onClick={handleActivateSearch}
               aria-label="검색"
             >
               <SearchIcon />
@@ -294,7 +400,42 @@ export function HomePage() {
         </div>
       </header>
 
-      <div className="pt-[122px]">
+      {isSearchActive ? (
+        <div className="pt-[122px]">
+          {searchResults.length > 0 ? (
+            <section className="overflow-hidden px-5">
+              <div className="flex items-center gap-1">
+                <h1 className="text-[16px] leading-[1.5] font-medium tracking-[-0.4px] text-grayscale-300">
+                  검색 결과
+                </h1>
+                <span className="flex size-5 items-center justify-center rounded-full bg-grayscale-100 text-[12px] leading-[1.5] font-medium tracking-[-0.3px] text-grayscale-000">
+                  {searchResults.length}
+                </span>
+              </div>
+
+              <div className="mt-3 grid grid-cols-2 justify-between gap-y-3">
+                {searchResults.map((bookmark) => (
+                  <SearchResultCard key={bookmark.id} bookmark={bookmark} />
+                ))}
+              </div>
+            </section>
+          ) : (
+            <section className="flex h-[323px] items-center justify-center px-5">
+              <div className="flex flex-col items-center justify-center gap-1 p-2.5">
+                <img
+                  src={emptyCharacter}
+                  alt=""
+                  className="h-[139px] w-[99px] object-contain"
+                />
+                <p className="font-poppins text-[16px] leading-[1.5] font-medium tracking-[-0.4px] text-grayscale-300">
+                  nothing...
+                </p>
+              </div>
+            </section>
+          )}
+        </div>
+      ) : (
+        <div className="pt-[122px]">
         <section className="overflow-hidden">
           <div className="px-5">
             <h1 className="font-poppins text-[16px] leading-[1.5] font-semibold text-black">
@@ -356,6 +497,38 @@ export function HomePage() {
           )}
         </section>
       </div>
+      )}
+
+      {isSearchActive ? (
+        <div className="fixed top-[433px] right-0 left-0 z-50 mx-auto flex w-full max-w-[430px] items-center justify-center gap-3">
+          <label className="flex h-[42px] w-[180px] items-center justify-between rounded-2xl bg-grayscale-200 py-3 pr-3 pl-5">
+            <span className="sr-only">검색어</span>
+            <input
+              ref={searchInputRef}
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="검색한 단어"
+              className="min-w-0 flex-1 bg-transparent text-[14px] leading-[1.5] font-medium tracking-[-0.35px] text-grayscale-000 outline-none placeholder:text-grayscale-000"
+            />
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="flex size-6 shrink-0 items-center justify-center text-grayscale-100"
+              aria-label="검색어 지우기"
+            >
+              <CloseIcon />
+            </button>
+          </label>
+          <button
+            type="button"
+            onClick={handleCloseSearch}
+            className="flex size-[42px] items-center justify-center rounded-full bg-grayscale-200 text-grayscale-000"
+            aria-label="검색 닫기"
+          >
+            <CloseIcon />
+          </button>
+        </div>
+      ) : null}
     </main>
   );
 }
