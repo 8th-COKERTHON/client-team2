@@ -13,6 +13,7 @@ import { NotificationListPage } from "@/pages/notification/NotificationListPage"
 import { SplashPage } from "@/pages/SplashPage";
 import { SignupPage } from "@/pages/SignupPage";
 import { SignupCompletePage } from "@/pages/SignupCompletePage";
+import { MyPage } from "@/pages/MyPage";
 
 export function AppRouter() {
   return (
@@ -25,9 +26,17 @@ export function AppRouter() {
       <Route path={ROUTES.signup} element={<SignupPage />} />
       <Route path={ROUTES.signupComplete} element={<SignupCompletePage />} />
       <Route path={ROUTES.linkCreate} element={<LinkCreatePage />} />
+<<<<<<< HEAD
       <Route path={ROUTES.linkEdit(":linkId")} element={<LinkEditPage />} />
       <Route path={ROUTES.collectionDetail(":tagId")} element={<CollectionDetailPage />} />
+=======
+      <Route
+        path={ROUTES.collectionDetail(":tagId")}
+        element={<CollectionDetailPage />}
+      />
+>>>>>>> 5bfebcb79ca02bcdfdc09a67f60af6b6dd253663
       <Route path={ROUTES.linkDetail(":linkId")} element={<LinkDetailPage />} />
+      <Route path={ROUTES.myPage} element={<MyPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
