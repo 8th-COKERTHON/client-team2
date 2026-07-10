@@ -1,10 +1,11 @@
-import { AppRouter } from "@/app/router";
+// import { AppRouter } from "@/app/router";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
+import { HomePage } from "./pages/HomePage";
 
 function App() {
   return (
     <div className="pb-[104px]">
-      <AppRouter />
+      <HomePage />
       <BottomNavigation />
     </div>
   );
