@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
-import { AppTopBar, MoreIcon } from "@/components/ui/AppTopBar";
 import { MobileScreen } from "@/components/ui/MobileScreen";
 import { ROUTES } from "@/constants/routes";
 import { createStoredBookmark } from "@/features/link/api/localBookmarkStorage";
@@ -38,9 +37,9 @@ function ClockIcon() {
   );
 }
 
-function CloseIcon() {
+function CloseIcon({ className = "size-4" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 16 16" className="size-4" aria-hidden="true">
+    <svg viewBox="0 0 16 16" className={className} aria-hidden="true">
       <path
         d="M4.5 4.5 11.5 11.5M11.5 4.5 4.5 11.5"
         fill="none"
@@ -50,6 +49,20 @@ function CloseIcon() {
       />
     </svg>
   );
+}
+
+function normalizeTag(tag: string): string {
+  return tag.trim().replace(/^#+/, "").trim();
+}
+
+function appendTag(tags: string[], draft: string): string[] {
+  const nextTag = normalizeTag(draft);
+
+  if (!nextTag || tags.includes(nextTag) || tags.length >= MAX_TAG_COUNT) {
+    return tags;
+  }
+
+  return [...tags, nextTag];
 }
 
 type FieldLabelProps = {
@@ -97,6 +110,7 @@ export function LinkCreatePage() {
   const [reminderTime, setReminderTime] = useState("");
   const [tags, setTags] = useState(INITIAL_TAGS);
   const [tagDraft, setTagDraft] = useState("");
+  const [isComposingTag, setIsComposingTag] = useState(false);
 
   const canSubmit =
     title.trim().length > 0 &&
@@ -105,13 +119,7 @@ export function LinkCreatePage() {
   const canAddTag = tagDraft.trim().length > 0 && tags.length < MAX_TAG_COUNT;
 
   const handleAddTag = (): void => {
-    const nextTag = tagDraft.trim().replace(/^#/, "");
-
-    if (!nextTag || tags.includes(nextTag) || tags.length >= MAX_TAG_COUNT) {
-      return;
-    }
-
-    setTags((current) => [...current, nextTag]);
+    setTags((current) => appendTag(current, tagDraft));
     setTagDraft("");
   };
 
@@ -124,30 +132,40 @@ export function LinkCreatePage() {
       return;
     }
 
+    const submitTags = appendTag(tags, tagDraft);
+
+    setTags(submitTags);
+    setTagDraft("");
+
     createStoredBookmark({
       title,
       url,
       reminderDate,
       reminderTime,
-      tags,
+      tags: submitTags,
     });
     navigate(ROUTES.home);
   };
 
   return (
     <MobileScreen>
-      <AppTopBar
-        title="북마크 저장"
-        rightSlot={
+      <header className="sticky top-0 z-30 bg-grayscale-000">
+        <div className="flex h-[60px] items-end px-5 pb-2" aria-hidden="true" />
+        <div className="grid h-[50px] grid-cols-[24px_1fr_24px] items-center px-5">
+          <span aria-hidden="true" />
+          <h1 className="truncate text-center text-[18px] leading-[1.5] font-semibold text-[#1c1c1a]">
+            북마크 저장
+          </h1>
           <button
             type="button"
-            className="flex size-6 items-center justify-center"
-            aria-label="북마크 저장 메뉴"
+            onClick={() => navigate(ROUTES.home)}
+            className="flex size-6 items-center justify-center text-grayscale-200"
+            aria-label="북마크 저장 닫기"
           >
-            <MoreIcon />
+            <CloseIcon className="size-6" />
           </button>
-        }
-      />
+        </div>
+      </header>
 
       <form
         className="flex min-h-[calc(100vh-110px)] flex-col px-5 pt-9 pb-[90px]"
@@ -199,29 +217,30 @@ export function LinkCreatePage() {
               ))}
 
               {tags.length < MAX_TAG_COUNT ? (
-                <div className="flex items-center gap-1">
-                  <input
-                    value={tagDraft}
-                    onChange={(event) => setTagDraft(event.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") {
-                        event.preventDefault();
-                        handleAddTag();
-                      }
-                    }}
-                    placeholder="# 태그추가"
-                    aria-label="해시태그 추가"
-                    className="h-[25px] w-[86px] rounded-md border border-dashed border-grayscale-100 bg-grayscale-000 px-1 text-[14px] leading-[1.5] font-medium text-grayscale-300 outline-none placeholder:text-grayscale-100"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleAddTag}
-                    disabled={!canAddTag}
-                    className="text-[12px] font-medium text-main disabled:text-grayscale-100"
-                  >
-                    추가
-                  </button>
-                </div>
+                <input
+                  value={tagDraft}
+                  onChange={(event) => setTagDraft(event.target.value)}
+                  onCompositionStart={() => setIsComposingTag(true)}
+                  onCompositionEnd={() => setIsComposingTag(false)}
+                  onKeyDown={(event) => {
+                    if (event.nativeEvent.isComposing || isComposingTag) {
+                      return;
+                    }
+
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      handleAddTag();
+                    }
+                  }}
+                  onBlur={() => {
+                    if (canAddTag) {
+                      handleAddTag();
+                    }
+                  }}
+                  placeholder="# 태그추가"
+                  aria-label="해시태그 추가"
+                  className="h-[25px] w-[86px] rounded-md border border-dashed border-grayscale-100 bg-grayscale-000 px-1 text-[14px] leading-[1.5] font-medium text-grayscale-300 outline-none placeholder:text-grayscale-100"
+                />
               ) : null}
             </div>
           </section>

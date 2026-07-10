@@ -56,8 +56,36 @@ function createTagId(tagName: string): string {
   return tagName.trim().replace(/^#/, "");
 }
 
+function decodeTagId(tagId: string): string {
+  try {
+    return decodeURIComponent(tagId);
+  } catch {
+    return tagId;
+  }
+}
+
+function normalizeBookmarkTags(bookmark: Bookmark): Bookmark {
+  const tagMap = new Map<string, Tag>();
+
+  bookmark.tags.forEach((tag) => {
+    const tagId = decodeTagId(tag.id);
+
+    if (!tagMap.has(tagId)) {
+      tagMap.set(tagId, {
+        id: tagId,
+        name: decodeTagId(tag.name),
+      });
+    }
+  });
+
+  return {
+    ...bookmark,
+    tags: Array.from(tagMap.values()),
+  };
+}
+
 function isSameTagId(storedTagId: string, routeTagId: string): boolean {
-  return storedTagId === routeTagId || decodeURIComponent(storedTagId) === routeTagId;
+  return decodeTagId(storedTagId) === decodeTagId(routeTagId);
 }
 
 function createDomain(url: string): string {
@@ -90,7 +118,7 @@ export function getStoredBookmarks(): Bookmark[] {
       return [];
     }
 
-    return parsedBookmarks.filter(isBookmark);
+    return parsedBookmarks.filter(isBookmark).map(normalizeBookmarkTags);
   } catch {
     return [];
   }

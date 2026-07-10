@@ -6,7 +6,7 @@ import { ROUTES } from "@/constants/routes";
 import { getStoredBookmarks } from "@/features/link/api/localBookmarkStorage";
 import type { Bookmark, Tag } from "@/features/link/types";
 
-const HOME_TAGS = ["tag-1", "tag-2", "tag-3"];
+const DEFAULT_PREVIEW_TAGS = ["태그", "태그", "태그"];
 
 function SearchIcon() {
   return (
@@ -66,7 +66,13 @@ function SiteIcon({ className = "size-5" }: { className?: string }) {
   );
 }
 
-function HomeTag({ size = "default" }: { size?: "default" | "small" }) {
+function HomeTag({
+  label,
+  size = "default",
+}: {
+  label: string;
+  size?: "default" | "small";
+}) {
   const isSmall = size === "small";
 
   return (
@@ -77,7 +83,7 @@ function HomeTag({ size = "default" }: { size?: "default" | "small" }) {
           : "w-11 px-1 py-0.5 text-[14px] leading-[1.5]"
       }`}
     >
-      # 태그
+      # {label}
     </span>
   );
 }
@@ -88,6 +94,10 @@ type ArchiveCardProps = {
 
 function ArchiveCard({ bookmark }: ArchiveCardProps) {
   const completedCount = bookmark.checklist.filter((item) => item.isCompleted).length;
+  const previewTags =
+    bookmark.tags.length > 0
+      ? bookmark.tags.slice(0, 3).map((tag) => tag.name)
+      : DEFAULT_PREVIEW_TAGS;
 
   return (
     <Link
@@ -108,8 +118,8 @@ function ArchiveCard({ bookmark }: ArchiveCardProps) {
         </div>
 
         <div className="flex gap-1 overflow-hidden">
-          {HOME_TAGS.map((tag) => (
-            <HomeTag key={tag} />
+          {previewTags.map((tag, index) => (
+            <HomeTag key={`${tag}-${index}`} label={tag} />
           ))}
         </div>
       </div>
@@ -128,16 +138,21 @@ type CollectionCardProps = {
 };
 
 function CollectionCard({ tag, count, sample }: CollectionCardProps) {
+  const previewTags =
+    sample.tags.length > 0
+      ? sample.tags.slice(0, 3).map((sampleTag) => sampleTag.name)
+      : DEFAULT_PREVIEW_TAGS;
+
   return (
     <Link
       to={ROUTES.collectionDetail(tag.id)}
       className="flex w-[160px] flex-col items-center gap-2"
     >
-      <div className="relative h-[160px] w-full overflow-hidden">
+      <div className="relative h-[160px] w-full overflow-visible">
         <div className="absolute top-[19px] left-[18px] h-[86px] w-[119px] rounded-[9px] bg-grayscale-100" />
         <div className="absolute top-[13px] left-[18px] h-[34px] w-[76px] rounded-t-[9px] bg-grayscale-100" />
 
-        <div className="absolute top-0 left-[42px] z-10 size-[125px] rotate-[15deg] rounded-lg bg-grayscale-white p-[11px]">
+        <div className="absolute top-0 left-[18px] z-10 size-[125px] rotate-[15deg] rounded-lg bg-grayscale-white p-[11px]">
           <div className="flex size-full flex-col justify-between">
             <div className="flex min-w-0 flex-col gap-2">
               <div className="flex min-w-0 flex-col gap-0.5">
@@ -151,9 +166,9 @@ function CollectionCard({ tag, count, sample }: CollectionCardProps) {
                   </span>
                 </div>
               </div>
-              <div className="flex gap-1">
-                {HOME_TAGS.map((sampleTag) => (
-                  <HomeTag key={sampleTag} size="small" />
+              <div className="flex gap-1 overflow-hidden">
+                {previewTags.map((sampleTag, index) => (
+                  <HomeTag key={`${sampleTag}-${index}`} label={sampleTag} size="small" />
                 ))}
               </div>
             </div>
@@ -165,8 +180,8 @@ function CollectionCard({ tag, count, sample }: CollectionCardProps) {
           </div>
         </div>
 
-        <div className="absolute bottom-[49px] left-0 z-20 h-[31px] w-[86px] rounded-t-[12px] bg-grayscale-050/75 backdrop-blur-[2px]" />
-        <div className="absolute inset-x-0 bottom-0 z-20 h-[82px] rounded-[12px] bg-gradient-to-b from-grayscale-000/70 via-grayscale-050/95 to-grayscale-050 shadow-[inset_0_1px_8px_rgba(255,255,255,0.8)] backdrop-blur-[3px]" />
+        <div className="absolute bottom-[51px] left-0 z-20 h-[31px] w-[86px] rounded-t-[12px] bg-grayscale-050/60 backdrop-blur-[4px]" />
+        <div className="absolute inset-x-0 bottom-0 z-20 h-[84px] rounded-[12px] bg-gradient-to-b from-grayscale-000/55 via-grayscale-050/75 to-grayscale-050/90 shadow-[inset_0_1px_10px_rgba(255,255,255,0.72)] backdrop-blur-[6px]" />
       </div>
 
       <div className="flex items-center gap-1">
