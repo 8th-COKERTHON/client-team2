@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
 
-import emptyCharacter from "@/assets/icons/character2.png";
+import emptyCharacter from "@/assets/icons/character_empty.png";
 import { ROUTES } from "@/constants/routes";
 import { useHome } from "@/features/home/hooks/useHome";
 import type { HomeArchiveItem, HomeCollection } from "@/features/home/types";
@@ -72,7 +72,11 @@ function CloseIcon() {
 
 function SiteIcon({ className = "size-5" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 20 20" className={`${className} text-grayscale-100`} aria-hidden="true">
+    <svg
+      viewBox="0 0 20 20"
+      className={`${className} text-grayscale-100`}
+      aria-hidden="true"
+    >
       <circle cx="10" cy="10" r="8" fill="currentColor" />
       <path
         d="M4 10h12M10 2.5c2 2 3 4.5 3 7.5s-1 5.5-3 7.5M10 2.5c-2 2-3 4.5-3 7.5s1 5.5 3 7.5"
@@ -95,7 +99,7 @@ function HomeTag({
 
   return (
     <span
-      className={`shrink-0 rounded-md bg-main-100 text-center font-medium text-main-300 ${
+      className={`bg-main-100 text-main-300 shrink-0 rounded-md text-center font-medium ${
         isSmall
           ? "w-[34px] px-[2px] py-px text-[9.72px] leading-[1.5]"
           : "w-11 px-1 py-0.5 text-[14px] leading-[1.5]"
@@ -158,7 +162,9 @@ type SearchResultCardProps = {
 
 function SearchResultCard({ bookmark }: SearchResultCardProps) {
   const description = getBookmarkDescription(bookmark);
-  const completedCount = bookmark.checklist.filter((item) => item.isCompleted).length;
+  const completedCount = bookmark.checklist.filter(
+    (item) => item.isCompleted,
+  ).length;
   const previewTags =
     bookmark.tags.length > 0
       ? bookmark.tags.slice(0, 2).map((tag) => tag.name)
@@ -167,16 +173,16 @@ function SearchResultCard({ bookmark }: SearchResultCardProps) {
   return (
     <Link
       to={ROUTES.linkDetail(bookmark.id)}
-      className="flex size-[161px] shrink-0 flex-col justify-between overflow-hidden rounded-xl bg-grayscale-white p-4"
+      className="bg-grayscale-white flex size-[161px] shrink-0 flex-col justify-between overflow-hidden rounded-xl p-4"
     >
       <div className="flex w-full flex-col gap-3">
         <div className="flex flex-col gap-0.5">
-          <h2 className="line-clamp-1 text-[18px] leading-[1.5] font-semibold tracking-[-0.45px] text-grayscale-800">
+          <h2 className="text-grayscale-800 line-clamp-1 text-[18px] leading-[1.5] font-semibold tracking-[-0.45px]">
             {description}
           </h2>
           <div className="flex items-center gap-1">
             <SiteIcon />
-            <span className="truncate text-[16px] leading-[1.5] font-medium tracking-[-0.4px] text-grayscale-200">
+            <span className="text-grayscale-200 truncate text-[16px] leading-[1.5] font-medium tracking-[-0.4px]">
               {bookmark.domain}
             </span>
           </div>
@@ -189,7 +195,7 @@ function SearchResultCard({ bookmark }: SearchResultCardProps) {
         </div>
       </div>
 
-      <p className="self-end text-[12px] leading-[1.5] font-medium tracking-[-0.3px] text-grayscale-100">
+      <p className="text-grayscale-100 self-end text-[12px] leading-[1.5] font-medium tracking-[-0.3px]">
         {completedCount}/{bookmark.checklist.length} 완료
       </p>
     </Link>
@@ -207,10 +213,10 @@ function CollectionCard({ collection }: CollectionCardProps) {
       className="flex w-[160px] flex-col items-center gap-2"
     >
       <div className="relative h-[160px] w-full overflow-hidden">
-        <div className="absolute top-3.5 left-2.5 size-[125px] rounded-lg bg-grayscale-100" />
+        <div className="bg-grayscale-100 absolute top-3.5 left-2.5 size-[125px] rounded-lg" />
 
         <div className="absolute top-0 left-1 flex size-[153px] items-center justify-center">
-          <div className="size-[125px] rotate-[15deg] overflow-hidden rounded-[8.33px] bg-grayscale-white p-[11px]">
+          <div className="bg-grayscale-white size-[125px] rotate-[15deg] overflow-hidden rounded-[8.33px] p-[11px]">
             <div className="flex size-full flex-col justify-between">
               <div className="flex min-w-0 flex-col gap-[8.33px]">
                 <div className="flex min-w-0 flex-col gap-[1.39px]">
@@ -245,8 +251,8 @@ function CollectionCard({ collection }: CollectionCardProps) {
 
         <div className="absolute top-[66px] left-0 z-20 h-[94px] w-full overflow-hidden rounded-lg bg-[linear-gradient(180deg,rgba(255,255,255,0.56)_0%,rgba(246,246,246,0.82)_55%,rgba(233,233,233,0.92)_100%)] shadow-[inset_0_1px_10px_rgba(255,255,255,0.85)] backdrop-blur-[6px]">
           <div className="absolute top-[-28px] left-[31px] h-[70px] w-[76px] rounded-full bg-white/70 blur-[18px]" />
-          <div className="absolute right-[28px] bottom-[13px] h-[30px] w-[65px] rounded-full bg-grayscale-100/35 blur-[12px]" />
-          <div className="absolute bottom-[8px] left-[15px] h-[17px] w-[78px] rounded-full bg-grayscale-100/30 blur-[10px]" />
+          <div className="bg-grayscale-100/35 absolute right-[28px] bottom-[13px] h-[30px] w-[65px] rounded-full blur-[12px]" />
+          <div className="bg-grayscale-100/30 absolute bottom-[8px] left-[15px] h-[17px] w-[78px] rounded-full blur-[10px]" />
         </div>
       </div>
 
@@ -275,7 +281,7 @@ function EmptyState({ message, className = "" }: EmptyStateProps) {
         alt=""
         className="h-[133px] w-[117px] object-contain"
       />
-      <p className="text-[14px] leading-[1.5] font-semibold text-grayscale-300">
+      <p className="text-grayscale-300 text-[14px] leading-[1.5] font-semibold">
         {message}
       </p>
     </div>
@@ -337,7 +343,9 @@ export function HomePage() {
   const searchResults = useMemo(
     () =>
       isSearchActive
-        ? bookmarks.filter((bookmark) => doesBookmarkMatchQuery(bookmark, searchQuery))
+        ? bookmarks.filter((bookmark) =>
+            doesBookmarkMatchQuery(bookmark, searchQuery),
+          )
         : [],
     [bookmarks, isSearchActive, searchQuery],
   );
@@ -359,8 +367,8 @@ export function HomePage() {
   };
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-[430px] bg-grayscale-000 pb-[140px] text-grayscale-900">
-      <header className="fixed top-0 right-0 left-0 z-40 mx-auto w-full max-w-[430px] bg-grayscale-000 px-5 pt-[60px]">
+    <main className="bg-grayscale-000 text-grayscale-900 mx-auto min-h-screen w-full max-w-[430px] pb-[140px]">
+      <header className="bg-grayscale-000 fixed top-0 right-0 left-0 z-40 mx-auto w-full max-w-[430px] px-5 pt-[60px]">
         <div className="flex h-[50px] items-center justify-between">
           <div>
             <p className="relative text-[40px] leading-[1.5] font-normal text-main">
@@ -369,7 +377,7 @@ export function HomePage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-4 text-grayscale-800">
+          <div className="text-grayscale-800 flex items-center gap-4">
             <button
               type="button"
               className="flex size-6 items-center justify-center"
@@ -394,10 +402,10 @@ export function HomePage() {
           {searchResults.length > 0 ? (
             <section className="overflow-hidden px-5">
               <div className="flex items-center gap-1">
-                <h1 className="text-[16px] leading-[1.5] font-medium tracking-[-0.4px] text-grayscale-300">
+                <h1 className="text-grayscale-300 text-[16px] leading-[1.5] font-medium tracking-[-0.4px]">
                   검색 결과
                 </h1>
-                <span className="flex size-5 items-center justify-center rounded-full bg-grayscale-100 text-[12px] leading-[1.5] font-medium tracking-[-0.3px] text-grayscale-000">
+                <span className="bg-grayscale-100 text-grayscale-000 flex size-5 items-center justify-center rounded-full text-[12px] leading-[1.5] font-medium tracking-[-0.3px]">
                   {searchResults.length}
                 </span>
               </div>
@@ -416,7 +424,7 @@ export function HomePage() {
                   alt=""
                   className="h-[139px] w-[99px] object-contain"
                 />
-                <p className="font-poppins text-[16px] leading-[1.5] font-medium tracking-[-0.4px] text-grayscale-300">
+                <p className="font-poppins text-grayscale-300 text-[16px] leading-[1.5] font-medium tracking-[-0.4px]">
                   nothing...
                 </p>
               </div>
@@ -470,31 +478,51 @@ export function HomePage() {
                 />
               ))}
             </div>
-          ) : (
-            <EmptyState
-              message="북마크한 링크가 없어요."
-              className="mt-[15px] h-[308px]"
-            />
-          )}
-        </section>
-      </div>
+
+            {hasBookmarks && collectionTags.length > 0 ? (
+              <div className="mt-[15px] grid grid-cols-2 gap-x-[15px] gap-y-[15px]">
+                {collectionTags.map((tag) => {
+                  const sampleBookmark = bookmarkByTagId[tag.id];
+
+                  if (!sampleBookmark) {
+                    return null;
+                  }
+
+                  return (
+                    <CollectionCard
+                      key={tag.id}
+                      tag={tag}
+                      count={tag.count}
+                      sample={sampleBookmark}
+                    />
+                  );
+                })}
+              </div>
+            ) : (
+              <EmptyState
+                message="북마크한 링크가 없어요."
+                className="mt-[15px] h-[308px]"
+              />
+            )}
+          </section>
+        </div>
       )}
 
       {isSearchActive ? (
         <div className="fixed top-[433px] right-0 left-0 z-50 mx-auto flex w-full max-w-[430px] items-center justify-center gap-3">
-          <label className="flex h-[42px] w-[180px] items-center justify-between rounded-2xl bg-grayscale-200 py-3 pr-3 pl-5">
+          <label className="bg-grayscale-200 flex h-[42px] w-[180px] items-center justify-between rounded-2xl py-3 pr-3 pl-5">
             <span className="sr-only">검색어</span>
             <input
               ref={searchInputRef}
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="검색한 단어"
-              className="min-w-0 flex-1 bg-transparent text-[14px] leading-[1.5] font-medium tracking-[-0.35px] text-grayscale-000 outline-none placeholder:text-grayscale-000"
+              className="text-grayscale-000 placeholder:text-grayscale-000 min-w-0 flex-1 bg-transparent text-[14px] leading-[1.5] font-medium tracking-[-0.35px] outline-none"
             />
             <button
               type="button"
               onClick={() => setSearchQuery("")}
-              className="flex size-6 shrink-0 items-center justify-center text-grayscale-100"
+              className="text-grayscale-100 flex size-6 shrink-0 items-center justify-center"
               aria-label="검색어 지우기"
             >
               <CloseIcon />
@@ -503,7 +531,7 @@ export function HomePage() {
           <button
             type="button"
             onClick={handleCloseSearch}
-            className="flex size-[42px] items-center justify-center rounded-full bg-grayscale-200 text-grayscale-000"
+            className="bg-grayscale-200 text-grayscale-000 flex size-[42px] items-center justify-center rounded-full"
             aria-label="검색 닫기"
           >
             <CloseIcon />
