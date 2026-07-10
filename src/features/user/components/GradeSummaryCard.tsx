@@ -28,14 +28,14 @@ export function GradeSummaryCard({ score, level }: GradeSummaryCardProps) {
     <div className="bg-grayscale-white flex w-full flex-col gap-2 rounded-xl p-4">
       <div className="flex h-[42px] w-full items-center justify-between px-2">
         <span className="text-[36px] leading-[40px]">{currentGrade.emoji}</span>
-        <p className="text-main relative text-[40px] leading-[1.5] font-bold tracking-[-1.2px]">
+        <p className="font-hakgyo text-main relative text-[40px] leading-[1.5] tracking-[-1.2px]">
           {score}점
           <ScoreUnderline />
         </p>
       </div>
 
       <div className="flex flex-col items-start px-1">
-        <p className="text-grayscale-800 text-[32px] leading-[1.5] font-bold tracking-[-0.96px]">
+        <p className="font-dandan text-grayscale-800 text-[32px] leading-[1.5] font-bold tracking-[-0.96px]">
           {currentGrade.label}
         </p>
       </div>
