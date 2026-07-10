@@ -6,11 +6,12 @@ export type TagResponse = {
 export type BookmarkRequest = {
   title: string;
   url: string;
-  remindAt: string;
-  tags: string[];
+  remindAt?: string;
+  tags?: string[];
+  checklists?: string[];
 };
 
-export type BookmarkResponse = {
+export type BookmarkMutationResponse = {
   bookmarkId: number;
   title: string;
   url: string;
@@ -24,9 +25,19 @@ export type BookmarkResponse = {
   updatedAt: string;
 };
 
+export type BookmarkResponse = {
+  bookmarkId: number;
+  title: string;
+  url: string;
+  tags: TagResponse[];
+  checklists: ChecklistResponse[];
+};
+
 export type CreateChecklistRequest = {
   content: string;
 };
+
+export type UpdateChecklistRequest = CreateChecklistRequest;
 
 export type ChecklistResponse = {
   checklistId: number;
