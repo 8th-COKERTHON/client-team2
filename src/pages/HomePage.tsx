@@ -134,16 +134,18 @@ function CollectionCard({ tag, count, sample }: CollectionCardProps) {
       className="flex w-[160px] flex-col items-center gap-2"
     >
       <div className="relative h-[160px] w-full overflow-hidden">
-        <div className="absolute top-3.5 left-2.5 size-[125px] rounded-lg bg-grayscale-100" />
-        <div className="absolute top-0 left-1 size-[153px] rotate-[15deg]">
-          <div className="flex size-[125px] flex-col justify-between rounded-lg bg-grayscale-white p-[11px]">
-            <div className="flex flex-col gap-2">
-              <div className="flex flex-col gap-0.5">
+        <div className="absolute top-[19px] left-[18px] h-[86px] w-[119px] rounded-[9px] bg-grayscale-100" />
+        <div className="absolute top-[13px] left-[18px] h-[34px] w-[76px] rounded-t-[9px] bg-grayscale-100" />
+
+        <div className="absolute top-0 left-[42px] z-10 size-[125px] rotate-[15deg] rounded-lg bg-grayscale-white p-[11px]">
+          <div className="flex size-full flex-col justify-between">
+            <div className="flex min-w-0 flex-col gap-2">
+              <div className="flex min-w-0 flex-col gap-0.5">
                 <p className="line-clamp-1 text-[12.5px] leading-[1.5] font-semibold text-grayscale-800">
                   링크 제목
                 </p>
-                <div className="flex items-center gap-1">
-                  <SiteIcon className="size-[14px]" />
+                <div className="flex min-w-0 items-center gap-1">
+                  <SiteIcon className="size-[14px] shrink-0" />
                   <span className="truncate text-[11px] leading-[1.5] font-medium text-grayscale-200">
                     {sample.domain}
                   </span>
@@ -162,7 +164,9 @@ function CollectionCard({ tag, count, sample }: CollectionCardProps) {
             </div>
           </div>
         </div>
-        <div className="absolute inset-x-0 bottom-0 h-[113px] bg-gradient-to-t from-grayscale-000 via-grayscale-000/95 to-grayscale-000/0" />
+
+        <div className="absolute bottom-[49px] left-0 z-20 h-[31px] w-[86px] rounded-t-[12px] bg-grayscale-050/75 backdrop-blur-[2px]" />
+        <div className="absolute inset-x-0 bottom-0 z-20 h-[82px] rounded-[12px] bg-gradient-to-b from-grayscale-000/70 via-grayscale-050/95 to-grayscale-050 shadow-[inset_0_1px_8px_rgba(255,255,255,0.8)] backdrop-blur-[3px]" />
       </div>
 
       <div className="flex items-center gap-1">
