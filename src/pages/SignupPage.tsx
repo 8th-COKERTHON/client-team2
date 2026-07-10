@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 import { ROUTES } from "@/constants/routes";
 import { signup } from "@/features/auth/api/authApi";
@@ -8,6 +8,7 @@ import { AuthLayout } from "@/features/auth/components/AuthLayout";
 import { AuthTextField } from "@/features/auth/components/AuthTextField";
 import { LogoPlaceholder } from "@/features/auth/components/LogoPlaceholder";
 import type { SignupFormValues } from "@/features/auth/types";
+import { getAuthErrorMessage } from "@/features/auth/utils";
 
 const INITIAL_FORM_VALUES: SignupFormValues = {
   username: "",
@@ -20,6 +21,7 @@ export function SignupPage() {
   const [formValues, setFormValues] =
     useState<SignupFormValues>(INITIAL_FORM_VALUES);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitErrorMessage, setSubmitErrorMessage] = useState("");
 
   const canSubmit =
     formValues.username.trim().length > 0 &&
@@ -30,6 +32,7 @@ export function SignupPage() {
   const handleChange =
     (field: keyof SignupFormValues) =>
     (event: React.ChangeEvent<HTMLInputElement>): void => {
+      setSubmitErrorMessage("");
       setFormValues((prevValues) => ({
         ...prevValues,
         [field]: event.target.value,
@@ -47,12 +50,15 @@ export function SignupPage() {
 
     try {
       setIsSubmitting(true);
+      setSubmitErrorMessage("");
       await signup({
         username: formValues.username.trim(),
         password: formValues.password,
         nickname: formValues.nickname.trim(),
       });
       navigate(ROUTES.signupComplete);
+    } catch (error) {
+      setSubmitErrorMessage(getAuthErrorMessage(error, "signup"));
     } finally {
       setIsSubmitting(false);
     }
@@ -102,10 +108,24 @@ export function SignupPage() {
 
         <div className="typo-kr-detail-medium mt-6 flex gap-[7px] px-1">
           <span className="text-grayscale-300">계정이 있으신가요?</span>
-          <Link to={ROUTES.login} className="typo-kr-detail-semibold text-main">
+          <button
+            type="button"
+            onClick={() => navigate(ROUTES.login)}
+            className="typo-kr-detail-semibold text-main"
+          >
             로그인
-          </Link>
+          </button>
         </div>
+
+        {submitErrorMessage ? (
+          <p
+            className="typo-kr-caption-medium mt-4 px-1 text-error"
+            role="alert"
+            aria-live="polite"
+          >
+            {submitErrorMessage}
+          </p>
+        ) : null}
 
         <div className="absolute right-4 bottom-[56px] left-4">
           <AuthButton type="submit" disabled={!canSubmit}>

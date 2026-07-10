@@ -1,14 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 
 import { MobileScreen } from "@/components/ui/MobileScreen";
 import { ROUTES } from "@/constants/routes";
+import {
+  getBookmarkDetail,
+  updateBookmark as updateBookmarkApi,
+} from "@/features/link/api/bookmarkApi";
 import {
   getStoredBookmark,
   updateStoredBookmark,
 } from "@/features/link/api/localBookmarkStorage";
 import { getMockBookmarkDetail } from "@/features/link/api/mockLinks";
 import type { Bookmark } from "@/features/link/types";
+import {
+  createReminderDateTime,
+  isServerId,
+  mapBookmarkDetailResponseToBookmark,
+} from "@/features/link/utils";
 
 const MAX_TAG_COUNT = 5;
 const DEFAULT_REMINDER_TIME = "09:00";
@@ -144,7 +153,10 @@ function appendTag(tags: string[], draft: string): string[] {
 }
 
 function splitReminderAt(reminderAt: string): { date: string; time: string } {
-  const [date = "", time = ""] = reminderAt.split(" ");
+  const [date = "", rawTime = ""] = reminderAt.includes("T")
+    ? reminderAt.split("T")
+    : reminderAt.split(" ");
+  const time = rawTime.slice(0, 5);
 
   return {
     date,
@@ -159,8 +171,13 @@ function getBookmarkDescription(bookmark: Bookmark): string {
 export function LinkEditPage() {
   const { linkId } = useParams();
   const navigate = useNavigate();
-  const bookmark =
-    getStoredBookmark(linkId ?? "") ?? getMockBookmarkDetail(linkId ?? "");
+  const [bookmark, setBookmark] = useState<Bookmark | null>(() => {
+    if (!linkId) {
+      return null;
+    }
+
+    return getStoredBookmark(linkId) ?? getMockBookmarkDetail(linkId) ?? null;
+  });
   const reminder = splitReminderAt(bookmark?.reminderAt ?? "");
   const [url, setUrl] = useState(() => bookmark?.url ?? "");
   const [title, setTitle] = useState(() =>
@@ -173,11 +190,86 @@ export function LinkEditPage() {
   );
   const [tagDraft, setTagDraft] = useState("");
   const [isComposingTag, setIsComposingTag] = useState(false);
+  const [isLoadingBookmark, setIsLoadingBookmark] = useState(() =>
+    linkId ? isServerId(linkId) : false,
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitErrorMessage, setSubmitErrorMessage] = useState("");
   const canSubmit =
     title.trim().length > 0 &&
     reminderDate.trim().length > 0 &&
-    reminderTime.trim().length > 0;
+    reminderTime.trim().length > 0 &&
+    !isSubmitting;
   const canAddTag = tagDraft.trim().length > 0 && tags.length < MAX_TAG_COUNT;
+
+  useEffect(() => {
+    if (!linkId || !isServerId(linkId)) {
+      return;
+    }
+
+    const targetLinkId = linkId;
+    let isMounted = true;
+
+    async function fetchBookmark(): Promise<void> {
+      setIsLoadingBookmark(true);
+
+      try {
+        const response = await getBookmarkDetail(targetLinkId);
+        const nextBookmark = mapBookmarkDetailResponseToBookmark(response);
+        const nextReminder = splitReminderAt(nextBookmark.reminderAt);
+
+        if (isMounted) {
+          setBookmark(nextBookmark);
+          setUrl(nextBookmark.url);
+          setTitle(getBookmarkDescription(nextBookmark));
+          setReminderDate(nextReminder.date);
+          setReminderTime(nextReminder.time);
+          setTags(nextBookmark.tags.map((tag) => tag.name));
+        }
+      } catch {
+        const fallbackBookmark =
+          getStoredBookmark(targetLinkId) ??
+          getMockBookmarkDetail(targetLinkId) ??
+          null;
+        const fallbackReminder = splitReminderAt(
+          fallbackBookmark?.reminderAt ?? "",
+        );
+
+        if (isMounted) {
+          setBookmark(fallbackBookmark);
+          setUrl(fallbackBookmark?.url ?? "");
+          setTitle(
+            fallbackBookmark ? getBookmarkDescription(fallbackBookmark) : "",
+          );
+          setReminderDate(fallbackReminder.date);
+          setReminderTime(fallbackReminder.time);
+          setTags(fallbackBookmark?.tags.map((tag) => tag.name) ?? []);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingBookmark(false);
+        }
+      }
+    }
+
+    void fetchBookmark();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [linkId]);
+
+  if (isLoadingBookmark && !bookmark) {
+    return (
+      <MobileScreen>
+        <div className="px-5 pt-20 text-center">
+          <p className="typo-kr-body-medium text-grayscale-300">
+            수정할 링크를 불러오는 중이에요.
+          </p>
+        </div>
+      </MobileScreen>
+    );
+  }
 
   if (!bookmark) {
     return (
@@ -198,32 +290,56 @@ export function LinkEditPage() {
   }
 
   const handleAddTag = (): void => {
+    setSubmitErrorMessage("");
     setTags((current) => appendTag(current, tagDraft));
     setTagDraft("");
   };
 
   const handleRemoveTag = (targetTag: string): void => {
+    setSubmitErrorMessage("");
     setTags((current) => current.filter((tag) => tag !== targetTag));
   };
 
-  const handleSubmit = (): void => {
+  const handleSubmit = async (): Promise<void> => {
     if (!canSubmit) {
       return;
     }
 
     const submitTags = appendTag(tags, tagDraft);
-
-    updateStoredBookmark(bookmark.id, {
-      title,
-      url,
-      reminderDate,
-      reminderTime,
+    const requestBody = {
+      title: title.trim(),
+      url: url.trim(),
+      remindAt: createReminderDateTime(reminderDate, reminderTime),
       tags: submitTags,
-    });
-    navigate(ROUTES.linkDetail(bookmark.id), {
-      replace: true,
-      state: { shouldShowEditSuccessToast: true },
-    });
+    };
+
+    try {
+      setIsSubmitting(true);
+      setSubmitErrorMessage("");
+
+      if (isServerId(bookmark.id)) {
+        await updateBookmarkApi(bookmark.id, requestBody);
+      } else {
+        updateStoredBookmark(bookmark.id, {
+          title,
+          url,
+          reminderDate,
+          reminderTime,
+          tags: submitTags,
+        });
+      }
+
+      navigate(ROUTES.linkDetail(bookmark.id), {
+        replace: true,
+        state: { shouldShowEditSuccessToast: true },
+      });
+    } catch {
+      setSubmitErrorMessage(
+        "북마크를 수정하지 못했어요. 입력값을 확인한 뒤 다시 시도해 주세요.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -268,7 +384,10 @@ export function LinkEditPage() {
               type="url"
               label="링크 URL"
               value={url}
-              onChange={setUrl}
+              onChange={(nextUrl) => {
+                setSubmitErrorMessage("");
+                setUrl(nextUrl);
+              }}
               placeholder="https://..."
             />
           </section>
@@ -278,7 +397,10 @@ export function LinkEditPage() {
             <TextField
               label="링크 제목"
               value={title}
-              onChange={setTitle}
+              onChange={(nextTitle) => {
+                setSubmitErrorMessage("");
+                setTitle(nextTitle);
+              }}
               placeholder="이 링크에 대해 간략히 설명해주세요."
             />
           </section>
@@ -306,7 +428,10 @@ export function LinkEditPage() {
               {tags.length < MAX_TAG_COUNT ? (
                 <input
                   value={tagDraft}
-                  onChange={(event) => setTagDraft(event.target.value)}
+                  onChange={(event) => {
+                    setSubmitErrorMessage("");
+                    setTagDraft(event.target.value);
+                  }}
                   onCompositionStart={() => setIsComposingTag(true)}
                   onCompositionEnd={() => setIsComposingTag(false)}
                   onKeyDown={(event) => {
@@ -339,7 +464,10 @@ export function LinkEditPage() {
                 <input
                   type="date"
                   value={reminderDate}
-                  onChange={(event) => setReminderDate(event.target.value)}
+                  onChange={(event) => {
+                    setSubmitErrorMessage("");
+                    setReminderDate(event.target.value);
+                  }}
                   className="min-w-0 flex-1 bg-transparent text-[14px] leading-[1.5] font-medium text-grayscale-800 outline-none"
                   aria-label="리마인드 날짜"
                 />
@@ -349,7 +477,10 @@ export function LinkEditPage() {
                 <input
                   type="time"
                   value={reminderTime}
-                  onChange={(event) => setReminderTime(event.target.value)}
+                  onChange={(event) => {
+                    setSubmitErrorMessage("");
+                    setReminderTime(event.target.value);
+                  }}
                   className="min-w-0 flex-1 bg-transparent text-[14px] leading-[1.5] font-medium text-grayscale-800 outline-none"
                   aria-label="리마인드 시간"
                 />
@@ -357,6 +488,16 @@ export function LinkEditPage() {
               </label>
             </div>
           </section>
+
+          {submitErrorMessage ? (
+            <p
+              className="text-[12px] leading-[1.5] font-medium text-error"
+              role="alert"
+              aria-live="polite"
+            >
+              {submitErrorMessage}
+            </p>
+          ) : null}
         </div>
       </form>
     </MobileScreen>

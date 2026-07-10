@@ -3,10 +3,13 @@ import { useNavigate } from "react-router";
 
 import { MobileScreen } from "@/components/ui/MobileScreen";
 import { ROUTES } from "@/constants/routes";
-import { createStoredBookmark } from "@/features/link/api/localBookmarkStorage";
+import { createBookmark } from "@/features/link/api/bookmarkApi";
+import { createChecklist } from "@/features/link/api/checklistApi";
+import { createReminderDateTime } from "@/features/link/utils";
 
 const MAX_TAG_COUNT = 5;
 const INITIAL_TAGS = ["개발", "학업"];
+const DEFAULT_CHECKLIST_CONTENT = "링크 열람하기";
 
 function CalendarIcon() {
   return (
@@ -111,23 +114,28 @@ export function LinkCreatePage() {
   const [tags, setTags] = useState(INITIAL_TAGS);
   const [tagDraft, setTagDraft] = useState("");
   const [isComposingTag, setIsComposingTag] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitErrorMessage, setSubmitErrorMessage] = useState("");
 
   const canSubmit =
     title.trim().length > 0 &&
     reminderDate.trim().length > 0 &&
-    reminderTime.trim().length > 0;
+    reminderTime.trim().length > 0 &&
+    !isSubmitting;
   const canAddTag = tagDraft.trim().length > 0 && tags.length < MAX_TAG_COUNT;
 
   const handleAddTag = (): void => {
+    setSubmitErrorMessage("");
     setTags((current) => appendTag(current, tagDraft));
     setTagDraft("");
   };
 
   const handleRemoveTag = (targetTag: string): void => {
+    setSubmitErrorMessage("");
     setTags((current) => current.filter((tag) => tag !== targetTag));
   };
 
-  const handleSubmit = (): void => {
+  const handleSubmit = async (): Promise<void> => {
     if (!canSubmit) {
       return;
     }
@@ -137,14 +145,29 @@ export function LinkCreatePage() {
     setTags(submitTags);
     setTagDraft("");
 
-    createStoredBookmark({
-      title,
-      url,
-      reminderDate,
-      reminderTime,
-      tags: submitTags,
-    });
-    navigate(ROUTES.home);
+    try {
+      setIsSubmitting(true);
+      setSubmitErrorMessage("");
+
+      const createdBookmark = await createBookmark({
+        title: title.trim(),
+        url: url.trim(),
+        remindAt: createReminderDateTime(reminderDate, reminderTime),
+        tags: submitTags,
+      });
+
+      await createChecklist(createdBookmark.bookmarkId, {
+        content: DEFAULT_CHECKLIST_CONTENT,
+      });
+
+      navigate(ROUTES.home);
+    } catch {
+      setSubmitErrorMessage(
+        "북마크를 저장하지 못했어요. 입력값을 확인한 뒤 다시 시도해 주세요.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -181,7 +204,10 @@ export function LinkCreatePage() {
               type="url"
               label="링크 URL"
               value={url}
-              onChange={setUrl}
+              onChange={(nextUrl) => {
+                setSubmitErrorMessage("");
+                setUrl(nextUrl);
+              }}
               placeholder="https://..."
             />
           </section>
@@ -191,7 +217,10 @@ export function LinkCreatePage() {
             <TextField
               label="링크 제목"
               value={title}
-              onChange={setTitle}
+              onChange={(nextTitle) => {
+                setSubmitErrorMessage("");
+                setTitle(nextTitle);
+              }}
               placeholder="이 링크에 대해 간략히 설명해주세요."
             />
           </section>
@@ -219,7 +248,10 @@ export function LinkCreatePage() {
               {tags.length < MAX_TAG_COUNT ? (
                 <input
                   value={tagDraft}
-                  onChange={(event) => setTagDraft(event.target.value)}
+                  onChange={(event) => {
+                    setSubmitErrorMessage("");
+                    setTagDraft(event.target.value);
+                  }}
                   onCompositionStart={() => setIsComposingTag(true)}
                   onCompositionEnd={() => setIsComposingTag(false)}
                   onKeyDown={(event) => {
@@ -252,7 +284,10 @@ export function LinkCreatePage() {
                 <input
                   type="date"
                   value={reminderDate}
-                  onChange={(event) => setReminderDate(event.target.value)}
+                  onChange={(event) => {
+                    setSubmitErrorMessage("");
+                    setReminderDate(event.target.value);
+                  }}
                   onInput={(event) =>
                     setReminderDate(event.currentTarget.value)
                   }
@@ -265,7 +300,10 @@ export function LinkCreatePage() {
                 <input
                   type="time"
                   value={reminderTime}
-                  onChange={(event) => setReminderTime(event.target.value)}
+                  onChange={(event) => {
+                    setSubmitErrorMessage("");
+                    setReminderTime(event.target.value);
+                  }}
                   onInput={(event) =>
                     setReminderTime(event.currentTarget.value)
                   }
@@ -280,6 +318,16 @@ export function LinkCreatePage() {
           <p className="text-[12px] leading-[1.5] font-medium text-grayscale-200">
             *저장 목적, 리마인드 날짜/시간은 필수 입력 항목입니다.
           </p>
+
+          {submitErrorMessage ? (
+            <p
+              className="text-[12px] leading-[1.5] font-medium text-error"
+              role="alert"
+              aria-live="polite"
+            >
+              {submitErrorMessage}
+            </p>
+          ) : null}
         </div>
 
         <button
@@ -287,7 +335,7 @@ export function LinkCreatePage() {
           disabled={!canSubmit}
           className="fixed right-4 bottom-[56px] left-4 mx-auto h-12 max-w-[398px] rounded-xl bg-main text-[16px] leading-[1.5] font-medium text-grayscale-white disabled:bg-grayscale-050 disabled:text-grayscale-200"
         >
-          완료
+          {isSubmitting ? "저장 중" : "완료"}
         </button>
       </form>
     </MobileScreen>

@@ -8,6 +8,7 @@ import { AuthLayout } from "@/features/auth/components/AuthLayout";
 import { AuthTextField } from "@/features/auth/components/AuthTextField";
 import { LogoPlaceholder } from "@/features/auth/components/LogoPlaceholder";
 import type { LoginFormValues } from "@/features/auth/types";
+import { getAuthErrorMessage } from "@/features/auth/utils";
 
 const INITIAL_FORM_VALUES: LoginFormValues = {
   username: "",
@@ -19,6 +20,7 @@ export function LoginPage() {
   const [formValues, setFormValues] =
     useState<LoginFormValues>(INITIAL_FORM_VALUES);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitErrorMessage, setSubmitErrorMessage] = useState("");
 
   const canSubmit =
     formValues.username.trim().length > 0 &&
@@ -28,6 +30,7 @@ export function LoginPage() {
   const handleChange =
     (field: keyof LoginFormValues) =>
     (event: React.ChangeEvent<HTMLInputElement>): void => {
+      setSubmitErrorMessage("");
       setFormValues((prevValues) => ({
         ...prevValues,
         [field]: event.target.value,
@@ -45,11 +48,14 @@ export function LoginPage() {
 
     try {
       setIsSubmitting(true);
+      setSubmitErrorMessage("");
       await login({
         username: formValues.username.trim(),
         password: formValues.password,
       });
       navigate(ROUTES.home);
+    } catch (error) {
+      setSubmitErrorMessage(getAuthErrorMessage(error, "login"));
     } finally {
       setIsSubmitting(false);
     }
@@ -96,6 +102,16 @@ export function LoginPage() {
             회원가입
           </Link>
         </div>
+
+        {submitErrorMessage ? (
+          <p
+            className="typo-kr-caption-medium mt-4 px-1 text-error"
+            role="alert"
+            aria-live="polite"
+          >
+            {submitErrorMessage}
+          </p>
+        ) : null}
 
         <div className="absolute right-4 bottom-[56px] left-4">
           <AuthButton type="submit" disabled={!canSubmit}>
