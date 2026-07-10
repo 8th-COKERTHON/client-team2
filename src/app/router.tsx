@@ -5,6 +5,7 @@ import { AuthEntryPage } from "@/pages/AuthEntryPage";
 import { HomePage } from "@/pages/HomePage";
 import { LoginPage } from "@/pages/LoginPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
+import { SignupPage } from "@/pages/SignupPage";
 import { SplashPage } from "@/pages/SplashPage";
 
 export function AppRouter() {
@@ -14,6 +15,7 @@ export function AppRouter() {
       <Route path={ROUTES.splash} element={<SplashPage />} />
       <Route path={ROUTES.authEntry} element={<AuthEntryPage />} />
       <Route path={ROUTES.login} element={<LoginPage />} />
+      <Route path={ROUTES.signup} element={<SignupPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
