@@ -3,8 +3,11 @@ import { Link } from "react-router";
 
 import emptyCharacter from "@/assets/icons/character2.png";
 import { ROUTES } from "@/constants/routes";
+import { useHome } from "@/features/home/hooks/useHome";
+import type { HomeArchiveItem, HomeCollection } from "@/features/home/types";
+import { mapBookmarksToHomeData } from "@/features/home/utils";
 import { getStoredBookmarks } from "@/features/link/api/localBookmarkStorage";
-import type { Bookmark, Tag } from "@/features/link/types";
+import type { Bookmark } from "@/features/link/types";
 import { ScoreUnderline } from "@/features/user/components/GradeSummaryCard";
 
 const DEFAULT_PREVIEW_TAGS = ["태그", "태그", "태그"];
@@ -108,31 +111,29 @@ function getBookmarkDescription(bookmark: Bookmark): string {
 }
 
 type ArchiveCardProps = {
-  bookmark: Bookmark;
+  archiveItem: HomeArchiveItem;
 };
 
-function ArchiveCard({ bookmark }: ArchiveCardProps) {
-  const description = getBookmarkDescription(bookmark);
-  const completedCount = bookmark.checklist.filter((item) => item.isCompleted).length;
+function ArchiveCard({ archiveItem }: ArchiveCardProps) {
   const previewTags =
-    bookmark.tags.length > 0
-      ? bookmark.tags.slice(0, 3).map((tag) => tag.name)
+    archiveItem.tags.length > 0
+      ? archiveItem.tags.slice(0, 3)
       : DEFAULT_PREVIEW_TAGS;
 
   return (
     <Link
-      to={ROUTES.linkDetail(bookmark.id)}
+      to={ROUTES.linkDetail(archiveItem.id)}
       className="flex size-[180px] shrink-0 flex-col justify-between rounded-xl bg-grayscale-white p-4"
     >
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-0.5">
           <h2 className="line-clamp-1 text-[18px] leading-[1.5] font-semibold text-grayscale-800">
-            {description}
+            {archiveItem.title}
           </h2>
           <div className="flex items-center gap-1">
             <SiteIcon />
             <span className="truncate text-[16px] leading-[1.5] font-medium text-grayscale-200">
-              {bookmark.domain}
+              {archiveItem.domain}
             </span>
           </div>
         </div>
@@ -145,7 +146,7 @@ function ArchiveCard({ bookmark }: ArchiveCardProps) {
       </div>
 
       <p className="self-end text-[12px] leading-[1.5] font-medium text-grayscale-100">
-        {completedCount}/{bookmark.checklist.length} 완료
+        {archiveItem.checkedCount}/{archiveItem.totalChecklistCount} 완료
       </p>
     </Link>
   );
@@ -196,22 +197,13 @@ function SearchResultCard({ bookmark }: SearchResultCardProps) {
 }
 
 type CollectionCardProps = {
-  tag: Tag & { count: number };
-  count: number;
-  sample: Bookmark;
+  collection: HomeCollection;
 };
 
-function CollectionCard({ tag, count, sample }: CollectionCardProps) {
-  const description = getBookmarkDescription(sample);
-  const completedCount = sample.checklist.filter((item) => item.isCompleted).length;
-  const previewTags =
-    sample.tags.length > 0
-      ? sample.tags.slice(0, 3).map((sampleTag) => sampleTag.name)
-      : DEFAULT_PREVIEW_TAGS;
-
+function CollectionCard({ collection }: CollectionCardProps) {
   return (
     <Link
-      to={ROUTES.collectionDetail(tag.id)}
+      to={ROUTES.collectionDetail(collection.tagName)}
       className="flex w-[160px] flex-col items-center gap-2"
     >
       <div className="relative h-[160px] w-full overflow-hidden">
@@ -223,17 +215,17 @@ function CollectionCard({ tag, count, sample }: CollectionCardProps) {
               <div className="flex min-w-0 flex-col gap-[8.33px]">
                 <div className="flex min-w-0 flex-col gap-[1.39px]">
                   <p className="line-clamp-1 text-[12.5px] leading-[1.5] font-semibold tracking-[-0.31px] text-grayscale-800">
-                    {description}
+                    링크 제목
                   </p>
                   <div className="flex min-w-0 items-center gap-[2.78px]">
                     <SiteIcon className="size-[13.89px] shrink-0" />
                     <span className="truncate text-[11.11px] leading-[1.5] font-medium tracking-[-0.28px] text-grayscale-200">
-                      {sample.domain}
+                      google.com
                     </span>
                   </div>
                 </div>
                 <div className="flex gap-[2.78px] overflow-hidden">
-                  {previewTags.map((sampleTag, index) => (
+                  {DEFAULT_PREVIEW_TAGS.map((sampleTag, index) => (
                     <HomeTag
                       key={`${sampleTag}-${index}`}
                       label={sampleTag}
@@ -244,9 +236,7 @@ function CollectionCard({ tag, count, sample }: CollectionCardProps) {
               </div>
 
               <div className="flex justify-between text-[8.33px] leading-[1.5] font-medium tracking-[-0.21px] text-grayscale-100">
-                <span>
-                  {completedCount}/{sample.checklist.length} 완료
-                </span>
+                <span>0/2 완료</span>
                 <span>2025/02/02</span>
               </div>
             </div>
@@ -262,10 +252,10 @@ function CollectionCard({ tag, count, sample }: CollectionCardProps) {
 
       <div className="flex items-center gap-1">
         <p className="text-[14px] leading-[1.5] font-semibold text-grayscale-800">
-          {tag.name}
+          {collection.tagName}
         </p>
         <span className="flex size-5 items-center justify-center rounded-full bg-grayscale-100 text-[12px] leading-[1.5] font-medium text-grayscale-000">
-          {count}
+          {collection.bookmarkCount}
         </span>
       </div>
     </Link>
@@ -314,27 +304,14 @@ function doesBookmarkMatchQuery(bookmark: Bookmark, query: string): boolean {
 
 export function HomePage() {
   const [bookmarks] = useState<Bookmark[]>(() => getStoredBookmarks());
+  const { homeData: apiHomeData } = useHome();
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const todayArchiveItems = bookmarks.slice(0, 2);
-  const hasBookmarks = bookmarks.length > 0;
-  const tagMap = new Map<string, Tag & { count: number }>();
-
-  bookmarks.forEach((bookmark) => {
-    bookmark.tags.forEach((tag) => {
-      const currentTag = tagMap.get(tag.id);
-
-      if (currentTag) {
-        tagMap.set(tag.id, { ...currentTag, count: currentTag.count + 1 });
-        return;
-      }
-
-      tagMap.set(tag.id, { ...tag, count: 1 });
-    });
-  });
-
-  const collectionTags = Array.from(tagMap.values());
+  const fallbackHomeData = useMemo(() => mapBookmarksToHomeData(bookmarks), [bookmarks]);
+  const homeData = apiHomeData ?? fallbackHomeData;
+  const todayArchiveItems = homeData.todayArchive;
+  const hasCollections = homeData.collections.length > 0;
   const searchResults = useMemo(
     () =>
       isSearchActive
@@ -342,16 +319,6 @@ export function HomePage() {
         : [],
     [bookmarks, isSearchActive, searchQuery],
   );
-  const bookmarkByTagId = collectionTags.reduce<Record<string, Bookmark | undefined>>(
-    (result, tag) => ({
-      ...result,
-      [tag.id]: bookmarks.find((bookmark) =>
-        bookmark.tags.some((bookmarkTag) => bookmarkTag.id === tag.id),
-      ),
-    }),
-    {},
-  );
-
   useEffect(() => {
     if (!isSearchActive) {
       return;
@@ -375,7 +342,7 @@ export function HomePage() {
         <div className="flex h-[50px] items-center justify-between">
           <div>
             <p className="relative text-[40px] leading-[1.5] font-normal text-main">
-              90점
+              {homeData.totalScore}점
               <ScoreUnderline />
             </p>
           </div>
@@ -445,7 +412,7 @@ export function HomePage() {
           {todayArchiveItems.length > 0 ? (
             <div className="mt-[15px] flex gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {todayArchiveItems.map((bookmark) => (
-                <ArchiveCard key={bookmark.id} bookmark={bookmark} />
+                <ArchiveCard key={bookmark.id} archiveItem={bookmark} />
               ))}
             </div>
           ) : (
@@ -470,24 +437,14 @@ export function HomePage() {
             </button>
           </div>
 
-          {hasBookmarks && collectionTags.length > 0 ? (
+          {hasCollections ? (
             <div className="mt-[15px] grid grid-cols-2 gap-x-[15px] gap-y-[15px]">
-              {collectionTags.map((tag) => {
-                const sampleBookmark = bookmarkByTagId[tag.id];
-
-                if (!sampleBookmark) {
-                  return null;
-                }
-
-                return (
-                  <CollectionCard
-                    key={tag.id}
-                    tag={tag}
-                    count={tag.count}
-                    sample={sampleBookmark}
-                  />
-                );
-              })}
+              {homeData.collections.map((collection) => (
+                <CollectionCard
+                  key={collection.tagName}
+                  collection={collection}
+                />
+              ))}
             </div>
           ) : (
             <EmptyState
