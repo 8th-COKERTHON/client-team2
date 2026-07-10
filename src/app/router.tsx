@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router";
 
 import { ROUTES } from "@/constants/routes";
 import { AuthEntryPage } from "@/pages/AuthEntryPage";
+import { CollectionDetailPage } from "@/pages/CollectionDetailPage";
 import { HomePage } from "@/pages/HomePage";
 import { LoginPage } from "@/pages/LoginPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
@@ -18,6 +19,7 @@ export function AppRouter() {
       <Route path={ROUTES.login} element={<LoginPage />} />
       <Route path={ROUTES.signup} element={<SignupPage />} />
       <Route path={ROUTES.signupComplete} element={<SignupCompletePage />} />
+      <Route path={ROUTES.collectionDetail(":tagId")} element={<CollectionDetailPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
