@@ -1,9 +1,32 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Hakgyoansim";
+  src:
+    url("./assets/fonts/Hakgyoansim_SaekyeonpilR.ttf") format("truetype"),
+    url("./assets/fonts/Hakgyoansim_SaekyeonpilOTFR.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "OkDanDan";
+  src:
+    url("./assets/fonts/OkDanDan-Bold.ttf") format("truetype"),
+    url("./assets/fonts/OkDanDan-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --font-pretendard:
     Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
   --font-poppins: Poppins, Inter, system-ui, sans-serif;
+
+  --font-hakgyo: "Hakgyoansim", sans-serif;
+  --font-dandan: "OkDanDan", sans-serif;
 
   --color-main-100: #ffedec;
   --color-main-200: #ffb8b4;
