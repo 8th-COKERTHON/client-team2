@@ -2,15 +2,15 @@ import { Link } from "react-router";
 
 import { ROUTES } from "@/constants/routes";
 import { MOCK_BOOKMARKS, MOCK_TAGS } from "@/features/link/api/mockLinks";
-import { TagBadge } from "@/features/link/components/TagBadge";
 import type { Bookmark, Tag } from "@/features/link/types";
 
 const TODAY_ARCHIVE_ITEMS = MOCK_BOOKMARKS.slice(0, 2);
 const COLLECTION_TAGS = [
   ...MOCK_TAGS,
-  { id: "study", name: "학업" },
-  { id: "career", name: "학업" },
+  { id: "tag-3", name: "태그3" },
+  { id: "tag-4", name: "태그4" },
 ] satisfies Tag[];
+const HOME_TAGS = ["tag-1", "tag-2", "tag-3"];
 
 function SearchIcon() {
   return (
@@ -70,6 +70,22 @@ function SiteIcon({ className = "size-5" }: { className?: string }) {
   );
 }
 
+function HomeTag({ size = "default" }: { size?: "default" | "small" }) {
+  const isSmall = size === "small";
+
+  return (
+    <span
+      className={`shrink-0 rounded-md bg-main-100 text-center font-medium text-main-300 ${
+        isSmall
+          ? "w-[34px] px-[2px] py-px text-[9.72px] leading-[1.5]"
+          : "w-11 px-1 py-0.5 text-[14px] leading-[1.5]"
+      }`}
+    >
+      # 태그
+    </span>
+  );
+}
+
 type ArchiveCardProps = {
   bookmark: Bookmark;
 };
@@ -85,7 +101,7 @@ function ArchiveCard({ bookmark }: ArchiveCardProps) {
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-0.5">
           <h2 className="line-clamp-1 text-[18px] leading-[1.5] font-semibold text-grayscale-800">
-            {bookmark.title}
+            링크 제목
           </h2>
           <div className="flex items-center gap-1">
             <SiteIcon />
@@ -95,9 +111,9 @@ function ArchiveCard({ bookmark }: ArchiveCardProps) {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-1 overflow-hidden">
-          {bookmark.tags.slice(0, 3).map((tag) => (
-            <TagBadge key={tag.id} tag={tag} />
+        <div className="flex gap-1 overflow-hidden">
+          {HOME_TAGS.map((tag) => (
+            <HomeTag key={tag} />
           ))}
         </div>
       </div>
@@ -128,7 +144,7 @@ function CollectionCard({ tag, count, sample }: CollectionCardProps) {
             <div className="flex flex-col gap-2">
               <div className="flex flex-col gap-0.5">
                 <p className="line-clamp-1 text-[12.5px] leading-[1.5] font-semibold text-grayscale-800">
-                  {sample.title}
+                  링크 제목
                 </p>
                 <div className="flex items-center gap-1">
                   <SiteIcon className="size-[14px]" />
@@ -138,13 +154,8 @@ function CollectionCard({ tag, count, sample }: CollectionCardProps) {
                 </div>
               </div>
               <div className="flex gap-1">
-                {sample.tags.slice(0, 2).map((sampleTag) => (
-                  <span
-                    key={sampleTag.id}
-                    className="rounded-md bg-main-100 px-0.5 py-px text-[10px] leading-[1.5] font-medium text-main-300"
-                  >
-                    # 태그
-                  </span>
+                {HOME_TAGS.map((sampleTag) => (
+                  <HomeTag key={sampleTag} size="small" />
                 ))}
               </div>
             </div>
@@ -175,7 +186,7 @@ export function HomePage() {
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-[430px] bg-grayscale-000 pb-[140px] text-grayscale-900">
-      <header className="bg-grayscale-000 px-5 pt-[60px]">
+      <header className="fixed top-0 right-0 left-0 z-40 mx-auto w-full max-w-[430px] bg-grayscale-000 px-5 pt-[60px]">
         <div className="flex h-[50px] items-center justify-between">
           <div className="relative">
             <p className="text-[40px] leading-[1.5] font-normal text-main">
@@ -203,44 +214,46 @@ export function HomePage() {
         </div>
       </header>
 
-      <section className="mt-3 overflow-hidden">
-        <div className="px-5">
-          <h1 className="font-poppins text-[16px] leading-[1.5] font-semibold text-black">
-            Today’s Archive
-          </h1>
-        </div>
-        <div className="mt-[15px] flex gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {TODAY_ARCHIVE_ITEMS.map((bookmark) => (
-            <ArchiveCard key={bookmark.id} bookmark={bookmark} />
-          ))}
-        </div>
-      </section>
+      <div className="pt-[122px]">
+        <section className="overflow-hidden">
+          <div className="px-5">
+            <h1 className="font-poppins text-[16px] leading-[1.5] font-semibold text-black">
+              Today’s Archive
+            </h1>
+          </div>
+          <div className="mt-[15px] flex gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {TODAY_ARCHIVE_ITEMS.map((bookmark) => (
+              <ArchiveCard key={bookmark.id} bookmark={bookmark} />
+            ))}
+          </div>
+        </section>
 
-      <section className="mt-5 px-5">
-        <div className="flex items-center justify-between">
-          <h2 className="font-poppins text-[16px] leading-[1.5] font-semibold text-black">
-            Collections
-          </h2>
-          <button
-            type="button"
-            className="flex size-6 items-center justify-center text-grayscale-800"
-            aria-label="컬렉션 더보기"
-          >
-            <ArrowRightIcon />
-          </button>
-        </div>
+        <section className="mt-5 px-5">
+          <div className="flex items-center justify-between">
+            <h2 className="font-poppins text-[16px] leading-[1.5] font-semibold text-black">
+              Collections
+            </h2>
+            <button
+              type="button"
+              className="flex size-6 items-center justify-center text-grayscale-800"
+              aria-label="컬렉션 더보기"
+            >
+              <ArrowRightIcon />
+            </button>
+          </div>
 
-        <div className="mt-[15px] grid grid-cols-2 gap-x-[15px] gap-y-[15px]">
-          {COLLECTION_TAGS.map((tag) => (
-            <CollectionCard
-              key={tag.id}
-              tag={tag}
-              count={4}
-              sample={sampleBookmark}
-            />
-          ))}
-        </div>
-      </section>
+          <div className="mt-[15px] grid grid-cols-2 gap-x-[15px] gap-y-[15px]">
+            {COLLECTION_TAGS.map((tag) => (
+              <CollectionCard
+                key={tag.id}
+                tag={tag}
+                count={4}
+                sample={sampleBookmark}
+              />
+            ))}
+          </div>
+        </section>
+      </div>
     </main>
   );
 }
