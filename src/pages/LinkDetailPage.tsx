@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link, useParams } from "react-router";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 
 import { AppTopBar, MoreIcon } from "@/components/ui/AppTopBar";
 import { MobileScreen } from "@/components/ui/MobileScreen";
@@ -38,19 +38,80 @@ function AddIcon() {
   );
 }
 
+function PencilIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-6" aria-hidden="true">
+      <path
+        d="M5 19h4.2L18.4 9.8a2 2 0 0 0 0-2.8L17 5.6a2 2 0 0 0-2.8 0L5 14.8V19ZM13.5 7.5l3 3"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function SuccessIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-6" aria-hidden="true">
+      <circle cx="12" cy="12" r="12" fill="currentColor" />
+      <path
+        d="M7 12.5 10.5 16 17 8.5"
+        fill="none"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+type LinkDetailLocationState = {
+  shouldShowEditSuccessToast?: boolean;
+};
+
 export function LinkDetailPage() {
   const { linkId } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const locationState = location.state as LinkDetailLocationState | null;
   const bookmark =
     getStoredBookmark(linkId ?? "") ?? getMockBookmarkDetail(linkId ?? "");
   const [checklist, setChecklist] = useState<ChecklistItem[]>(
     () => bookmark?.checklist ?? [],
   );
   const [draftTitle, setDraftTitle] = useState("");
+  const [showEditSuccessToast, setShowEditSuccessToast] = useState(
+    () => Boolean(locationState?.shouldShowEditSuccessToast),
+  );
   const completedCount = useMemo(
     () => checklist.filter((item) => item.isCompleted).length,
     [checklist],
   );
   const canAddChecklist = checklist.length < MAX_CHECKLIST_COUNT;
+
+  useEffect(() => {
+    if (!locationState?.shouldShowEditSuccessToast) {
+      return;
+    }
+
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.pathname, locationState?.shouldShowEditSuccessToast, navigate]);
+
+  useEffect(() => {
+    if (!showEditSuccessToast) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setShowEditSuccessToast(false);
+    }, 2200);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [showEditSuccessToast]);
 
   if (!bookmark) {
     return (
@@ -104,10 +165,10 @@ export function LinkDetailPage() {
         rightSlot={
           <Link
             to={ROUTES.linkEdit(bookmark.id)}
-            className="flex size-6 items-center justify-center"
+            className="flex size-6 items-center justify-center text-grayscale-200"
             aria-label="링크 수정"
           >
-            <MoreIcon />
+            <PencilIcon />
           </Link>
         }
       />
@@ -217,6 +278,15 @@ export function LinkDetailPage() {
           ) : null}
         </div>
       </section>
+
+      {showEditSuccessToast ? (
+        <div className="fixed right-5 bottom-[144px] left-5 z-40 mx-auto flex max-w-[390px] items-center gap-2 rounded-lg border border-[#71e3bb] bg-[#dcf8ee] px-[17px] py-[13px] text-[#3eb088]">
+          <SuccessIcon />
+          <p className="text-[14px] leading-[1.5] font-semibold">
+            북마크가 수정되었어요
+          </p>
+        </div>
+      ) : null}
     </MobileScreen>
   );
 }
