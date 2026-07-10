@@ -102,13 +102,13 @@ export function LinkDetailPage() {
       <AppTopBar
         title={bookmark.title}
         rightSlot={
-          <button
-            type="button"
+          <Link
+            to={ROUTES.linkEdit(bookmark.id)}
             className="flex size-6 items-center justify-center"
-            aria-label="링크 수정 메뉴"
+            aria-label="링크 수정"
           >
             <MoreIcon />
-          </button>
+          </Link>
         }
       />
 

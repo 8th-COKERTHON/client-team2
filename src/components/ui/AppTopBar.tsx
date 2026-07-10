@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 
 type AppTopBarProps = {
   title: string;
+  leftSlot?: ReactNode;
   rightSlot?: ReactNode;
 };
 
@@ -32,21 +33,26 @@ export function MoreIcon() {
   );
 }
 
-export function AppTopBar({ title, rightSlot }: AppTopBarProps) {
+export function AppTopBar({ title, leftSlot, rightSlot }: AppTopBarProps) {
   const navigate = useNavigate();
+  const defaultLeftSlot = (
+    <button
+      type="button"
+      onClick={() => navigate(-1)}
+      className="flex size-6 items-center justify-center text-grayscale-800"
+      aria-label="이전 화면으로 이동"
+    >
+      <BackIcon />
+    </button>
+  );
 
   return (
     <header className="sticky top-0 z-30 bg-grayscale-000">
       <div className="flex h-[60px] items-end px-5 pb-2" aria-hidden="true" />
       <div className="flex h-[50px] items-center justify-between px-5">
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="flex size-6 items-center justify-center text-grayscale-800"
-          aria-label="이전 화면으로 이동"
-        >
-          <BackIcon />
-        </button>
+        <div className="flex size-6 items-center justify-center">
+          {leftSlot ?? defaultLeftSlot}
+        </div>
         <h1 className="max-w-[230px] truncate text-center text-[18px] leading-[1.5] font-semibold text-[#1c1c1a]">
           {title}
         </h1>

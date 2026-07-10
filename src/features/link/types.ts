@@ -17,6 +17,7 @@ export type Bookmark = {
   purpose: string;
   reminderAt: string;
   score: number;
+  viewedAt?: string;
   tags: Tag[];
   checklist: ChecklistItem[];
 };

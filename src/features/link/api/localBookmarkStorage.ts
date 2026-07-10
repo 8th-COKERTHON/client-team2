@@ -10,6 +10,8 @@ export type CreateBookmarkInput = {
   tags: string[];
 };
 
+export type UpdateBookmarkInput = CreateBookmarkInput;
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
@@ -41,6 +43,7 @@ function isBookmark(value: unknown): value is Bookmark {
     typeof value.purpose === "string" &&
     typeof value.reminderAt === "string" &&
     typeof value.score === "number" &&
+    (value.viewedAt === undefined || typeof value.viewedAt === "string") &&
     Array.isArray(value.tags) &&
     value.tags.every(isTag) &&
     Array.isArray(value.checklist) &&
@@ -132,6 +135,81 @@ export function getStoredBookmarksByTag(tagId: string): Bookmark[] {
   return getStoredBookmarks().filter((bookmark) =>
     bookmark.tags.some((tag) => isSameTagId(tag.id, tagId)),
   );
+}
+
+export function markStoredBookmarkAsViewed(bookmarkId: string): Bookmark | undefined {
+  const bookmarks = getStoredBookmarks();
+  const targetBookmark = bookmarks.find((bookmark) => bookmark.id === bookmarkId);
+
+  if (!targetBookmark) {
+    return undefined;
+  }
+
+  const viewedBookmark: Bookmark = {
+    ...targetBookmark,
+    viewedAt: targetBookmark.viewedAt ?? new Date().toISOString(),
+  };
+
+  window.localStorage.setItem(
+    BOOKMARK_STORAGE_KEY,
+    JSON.stringify(
+      bookmarks.map((bookmark) =>
+        bookmark.id === bookmarkId ? viewedBookmark : bookmark,
+      ),
+    ),
+  );
+
+  return viewedBookmark;
+}
+
+export function deleteStoredBookmark(bookmarkId: string): void {
+  const bookmarks = getStoredBookmarks().filter(
+    (bookmark) => bookmark.id !== bookmarkId,
+  );
+
+  window.localStorage.setItem(BOOKMARK_STORAGE_KEY, JSON.stringify(bookmarks));
+}
+
+export function updateStoredBookmark(
+  bookmarkId: string,
+  input: UpdateBookmarkInput,
+): Bookmark | undefined {
+  const bookmarks = getStoredBookmarks();
+  const targetBookmark = bookmarks.find((bookmark) => bookmark.id === bookmarkId);
+
+  if (!targetBookmark) {
+    return undefined;
+  }
+
+  const tags = input.tags
+    .map((tagName) => tagName.trim().replace(/^#/, ""))
+    .filter(Boolean)
+    .slice(0, 5)
+    .map((tagName) => ({
+      id: createTagId(tagName),
+      name: tagName,
+    }));
+
+  const updatedBookmark: Bookmark = {
+    ...targetBookmark,
+    title: input.title.trim(),
+    url: input.url.trim(),
+    domain: createDomain(input.url),
+    purpose: input.title.trim(),
+    reminderAt: `${input.reminderDate} ${input.reminderTime}`,
+    tags,
+  };
+
+  window.localStorage.setItem(
+    BOOKMARK_STORAGE_KEY,
+    JSON.stringify(
+      bookmarks.map((bookmark) =>
+        bookmark.id === bookmarkId ? updatedBookmark : bookmark,
+      ),
+    ),
+  );
+
+  return updatedBookmark;
 }
 
 export function createStoredBookmark(input: CreateBookmarkInput): Bookmark {
