@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
 
 import emptyCharacter from "@/assets/icons/character2.png";
 import { ROUTES } from "@/constants/routes";
 import { getStoredBookmarks } from "@/features/link/api/localBookmarkStorage";
 import type { Bookmark, Tag } from "@/features/link/types";
+import { ScoreUnderline } from "@/features/user/components/GradeSummaryCard";
 
 const DEFAULT_PREVIEW_TAGS = ["태그", "태그", "태그"];
 
@@ -47,6 +48,20 @@ function ArrowRightIcon() {
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-6" aria-hidden="true">
+      <path
+        d="M6 6l12 12M18 6 6 18"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
       />
     </svg>
   );
@@ -136,6 +151,50 @@ function ArchiveCard({ bookmark }: ArchiveCardProps) {
   );
 }
 
+type SearchResultCardProps = {
+  bookmark: Bookmark;
+};
+
+function SearchResultCard({ bookmark }: SearchResultCardProps) {
+  const description = getBookmarkDescription(bookmark);
+  const completedCount = bookmark.checklist.filter((item) => item.isCompleted).length;
+  const previewTags =
+    bookmark.tags.length > 0
+      ? bookmark.tags.slice(0, 2).map((tag) => tag.name)
+      : DEFAULT_PREVIEW_TAGS.slice(0, 2);
+
+  return (
+    <Link
+      to={ROUTES.linkDetail(bookmark.id)}
+      className="flex size-[161px] shrink-0 flex-col justify-between overflow-hidden rounded-xl bg-grayscale-white p-4"
+    >
+      <div className="flex w-full flex-col gap-3">
+        <div className="flex flex-col gap-0.5">
+          <h2 className="line-clamp-1 text-[18px] leading-[1.5] font-semibold tracking-[-0.45px] text-grayscale-800">
+            {description}
+          </h2>
+          <div className="flex items-center gap-1">
+            <SiteIcon />
+            <span className="truncate text-[16px] leading-[1.5] font-medium tracking-[-0.4px] text-grayscale-200">
+              {bookmark.domain}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-1 overflow-hidden">
+          {previewTags.map((tag, index) => (
+            <HomeTag key={`${tag}-${index}`} label={tag} />
+          ))}
+        </div>
+      </div>
+
+      <p className="self-end text-[12px] leading-[1.5] font-medium tracking-[-0.3px] text-grayscale-100">
+        {completedCount}/{bookmark.checklist.length} 완료
+      </p>
+    </Link>
+  );
+}
+
 type CollectionCardProps = {
   tag: Tag & { count: number };
   count: number;
@@ -144,6 +203,7 @@ type CollectionCardProps = {
 
 function CollectionCard({ tag, count, sample }: CollectionCardProps) {
   const description = getBookmarkDescription(sample);
+  const completedCount = sample.checklist.filter((item) => item.isCompleted).length;
   const previewTags =
     sample.tags.length > 0
       ? sample.tags.slice(0, 3).map((sampleTag) => sampleTag.name)
@@ -154,40 +214,50 @@ function CollectionCard({ tag, count, sample }: CollectionCardProps) {
       to={ROUTES.collectionDetail(tag.id)}
       className="flex w-[160px] flex-col items-center gap-2"
     >
-      <div className="relative h-[160px] w-full overflow-visible">
-        <div className="absolute top-[19px] left-[18px] h-[86px] w-[119px] rounded-[9px] bg-grayscale-100" />
-        <div className="absolute top-[13px] left-[18px] h-[34px] w-[76px] rounded-t-[9px] bg-grayscale-100" />
+      <div className="relative h-[160px] w-full overflow-hidden">
+        <div className="absolute top-3.5 left-2.5 size-[125px] rounded-lg bg-grayscale-100" />
 
-        <div className="absolute top-0 left-[18px] z-10 size-[125px] rotate-[15deg] rounded-lg bg-grayscale-white p-[11px]">
-          <div className="flex size-full flex-col justify-between">
-            <div className="flex min-w-0 flex-col gap-2">
-              <div className="flex min-w-0 flex-col gap-0.5">
-                <p className="line-clamp-1 text-[12.5px] leading-[1.5] font-semibold text-grayscale-800">
-                  {description}
-                </p>
-                <div className="flex min-w-0 items-center gap-1">
-                  <SiteIcon className="size-[14px] shrink-0" />
-                  <span className="truncate text-[11px] leading-[1.5] font-medium text-grayscale-200">
-                    {sample.domain}
-                  </span>
+        <div className="absolute top-0 left-1 flex size-[153px] items-center justify-center">
+          <div className="size-[125px] rotate-[15deg] overflow-hidden rounded-[8.33px] bg-grayscale-white p-[11px]">
+            <div className="flex size-full flex-col justify-between">
+              <div className="flex min-w-0 flex-col gap-[8.33px]">
+                <div className="flex min-w-0 flex-col gap-[1.39px]">
+                  <p className="line-clamp-1 text-[12.5px] leading-[1.5] font-semibold tracking-[-0.31px] text-grayscale-800">
+                    {description}
+                  </p>
+                  <div className="flex min-w-0 items-center gap-[2.78px]">
+                    <SiteIcon className="size-[13.89px] shrink-0" />
+                    <span className="truncate text-[11.11px] leading-[1.5] font-medium tracking-[-0.28px] text-grayscale-200">
+                      {sample.domain}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex gap-[2.78px] overflow-hidden">
+                  {previewTags.map((sampleTag, index) => (
+                    <HomeTag
+                      key={`${sampleTag}-${index}`}
+                      label={sampleTag}
+                      size="small"
+                    />
+                  ))}
                 </div>
               </div>
-              <div className="flex gap-1 overflow-hidden">
-                {previewTags.map((sampleTag, index) => (
-                  <HomeTag key={`${sampleTag}-${index}`} label={sampleTag} size="small" />
-                ))}
-              </div>
-            </div>
 
-            <div className="flex justify-between text-[8px] leading-[1.5] font-medium text-grayscale-100">
-              <span>0/{sample.checklist.length} 완료</span>
-              <span>2025/02/02</span>
+              <div className="flex justify-between text-[8.33px] leading-[1.5] font-medium tracking-[-0.21px] text-grayscale-100">
+                <span>
+                  {completedCount}/{sample.checklist.length} 완료
+                </span>
+                <span>2025/02/02</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="absolute bottom-[51px] left-0 z-20 h-[31px] w-[86px] rounded-t-[12px] bg-grayscale-050/60 backdrop-blur-[4px]" />
-        <div className="absolute inset-x-0 bottom-0 z-20 h-[84px] rounded-[12px] bg-gradient-to-b from-grayscale-000/55 via-grayscale-050/75 to-grayscale-050/90 shadow-[inset_0_1px_10px_rgba(255,255,255,0.72)] backdrop-blur-[6px]" />
+        <div className="absolute top-[66px] left-0 z-20 h-[94px] w-full overflow-hidden rounded-lg bg-[linear-gradient(180deg,rgba(255,255,255,0.56)_0%,rgba(246,246,246,0.82)_55%,rgba(233,233,233,0.92)_100%)] shadow-[inset_0_1px_10px_rgba(255,255,255,0.85)] backdrop-blur-[6px]">
+          <div className="absolute top-[-28px] left-[31px] h-[70px] w-[76px] rounded-full bg-white/70 blur-[18px]" />
+          <div className="absolute right-[28px] bottom-[13px] h-[30px] w-[65px] rounded-full bg-grayscale-100/35 blur-[12px]" />
+          <div className="absolute bottom-[8px] left-[15px] h-[17px] w-[78px] rounded-full bg-grayscale-100/30 blur-[10px]" />
+        </div>
       </div>
 
       <div className="flex items-center gap-1">
@@ -222,8 +292,31 @@ function EmptyState({ message, className = "" }: EmptyStateProps) {
   );
 }
 
+function doesBookmarkMatchQuery(bookmark: Bookmark, query: string): boolean {
+  const normalizedQuery = query.trim().toLowerCase();
+
+  if (!normalizedQuery) {
+    return false;
+  }
+
+  const searchableText = [
+    bookmark.title,
+    bookmark.purpose,
+    bookmark.url,
+    bookmark.domain,
+    ...bookmark.tags.map((tag) => tag.name),
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  return searchableText.includes(normalizedQuery);
+}
+
 export function HomePage() {
   const [bookmarks] = useState<Bookmark[]>(() => getStoredBookmarks());
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const todayArchiveItems = bookmarks.slice(0, 2);
   const hasBookmarks = bookmarks.length > 0;
   const tagMap = new Map<string, Tag & { count: number }>();
@@ -242,6 +335,13 @@ export function HomePage() {
   });
 
   const collectionTags = Array.from(tagMap.values());
+  const searchResults = useMemo(
+    () =>
+      isSearchActive
+        ? bookmarks.filter((bookmark) => doesBookmarkMatchQuery(bookmark, searchQuery))
+        : [],
+    [bookmarks, isSearchActive, searchQuery],
+  );
   const bookmarkByTagId = collectionTags.reduce<Record<string, Bookmark | undefined>>(
     (result, tag) => ({
       ...result,
@@ -252,21 +352,39 @@ export function HomePage() {
     {},
   );
 
+  useEffect(() => {
+    if (!isSearchActive) {
+      return;
+    }
+
+    searchInputRef.current?.focus();
+  }, [isSearchActive]);
+
+  const handleActivateSearch = (): void => {
+    setIsSearchActive(true);
+  };
+
+  const handleCloseSearch = (): void => {
+    setIsSearchActive(false);
+    setSearchQuery("");
+  };
+
   return (
     <main className="mx-auto min-h-screen w-full max-w-[430px] bg-grayscale-000 pb-[140px] text-grayscale-900">
       <header className="fixed top-0 right-0 left-0 z-40 mx-auto w-full max-w-[430px] bg-grayscale-000 px-5 pt-[60px]">
         <div className="flex h-[50px] items-center justify-between">
-          <div className="relative">
-            <p className="text-[40px] leading-[1.5] font-normal text-main">
+          <div>
+            <p className="relative text-[40px] leading-[1.5] font-normal text-main">
               90점
+              <ScoreUnderline />
             </p>
-            <span className="absolute bottom-2 left-0 h-2 w-24 rounded-full bg-main-100" />
           </div>
 
           <div className="flex items-center gap-4 text-grayscale-800">
             <button
               type="button"
               className="flex size-6 items-center justify-center"
+              onClick={handleActivateSearch}
               aria-label="검색"
             >
               <SearchIcon />
@@ -282,7 +400,42 @@ export function HomePage() {
         </div>
       </header>
 
-      <div className="pt-[122px]">
+      {isSearchActive ? (
+        <div className="pt-[122px]">
+          {searchResults.length > 0 ? (
+            <section className="overflow-hidden px-5">
+              <div className="flex items-center gap-1">
+                <h1 className="text-[16px] leading-[1.5] font-medium tracking-[-0.4px] text-grayscale-300">
+                  검색 결과
+                </h1>
+                <span className="flex size-5 items-center justify-center rounded-full bg-grayscale-100 text-[12px] leading-[1.5] font-medium tracking-[-0.3px] text-grayscale-000">
+                  {searchResults.length}
+                </span>
+              </div>
+
+              <div className="mt-3 grid grid-cols-2 justify-between gap-y-3">
+                {searchResults.map((bookmark) => (
+                  <SearchResultCard key={bookmark.id} bookmark={bookmark} />
+                ))}
+              </div>
+            </section>
+          ) : (
+            <section className="flex h-[323px] items-center justify-center px-5">
+              <div className="flex flex-col items-center justify-center gap-1 p-2.5">
+                <img
+                  src={emptyCharacter}
+                  alt=""
+                  className="h-[139px] w-[99px] object-contain"
+                />
+                <p className="font-poppins text-[16px] leading-[1.5] font-medium tracking-[-0.4px] text-grayscale-300">
+                  nothing...
+                </p>
+              </div>
+            </section>
+          )}
+        </div>
+      ) : (
+        <div className="pt-[122px]">
         <section className="overflow-hidden">
           <div className="px-5">
             <h1 className="font-poppins text-[16px] leading-[1.5] font-semibold text-black">
@@ -344,6 +497,38 @@ export function HomePage() {
           )}
         </section>
       </div>
+      )}
+
+      {isSearchActive ? (
+        <div className="fixed top-[433px] right-0 left-0 z-50 mx-auto flex w-full max-w-[430px] items-center justify-center gap-3">
+          <label className="flex h-[42px] w-[180px] items-center justify-between rounded-2xl bg-grayscale-200 py-3 pr-3 pl-5">
+            <span className="sr-only">검색어</span>
+            <input
+              ref={searchInputRef}
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="검색한 단어"
+              className="min-w-0 flex-1 bg-transparent text-[14px] leading-[1.5] font-medium tracking-[-0.35px] text-grayscale-000 outline-none placeholder:text-grayscale-000"
+            />
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="flex size-6 shrink-0 items-center justify-center text-grayscale-100"
+              aria-label="검색어 지우기"
+            >
+              <CloseIcon />
+            </button>
+          </label>
+          <button
+            type="button"
+            onClick={handleCloseSearch}
+            className="flex size-[42px] items-center justify-center rounded-full bg-grayscale-200 text-grayscale-000"
+            aria-label="검색 닫기"
+          >
+            <CloseIcon />
+          </button>
+        </div>
+      ) : null}
     </main>
   );
 }

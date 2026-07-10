@@ -5,7 +5,7 @@ type GradeSummaryCardProps = {
   level: string;
 };
 
-function ScoreUnderline() {
+export function ScoreUnderline() {
   return (
     <svg
       viewBox="0 0 76 11"

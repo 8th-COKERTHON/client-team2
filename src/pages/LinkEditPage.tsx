@@ -220,7 +220,10 @@ export function LinkEditPage() {
       reminderTime,
       tags: submitTags,
     });
-    navigate(ROUTES.linkDetail(bookmark.id));
+    navigate(ROUTES.linkDetail(bookmark.id), {
+      replace: true,
+      state: { shouldShowEditSuccessToast: true },
+    });
   };
 
   return (
