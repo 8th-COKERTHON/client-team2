@@ -107,13 +107,11 @@ export function SignupPage() {
           </Link>
         </div>
 
-        <AuthButton
-          type="submit"
-          disabled={!canSubmit}
-          className="absolute right-4 bottom-[56px] left-4 w-auto"
-        >
-          {isSubmitting ? "가입 중" : "회원가입"}
-        </AuthButton>
+        <div className="absolute right-4 bottom-[56px] left-4">
+          <AuthButton type="submit" disabled={!canSubmit}>
+            {isSubmitting ? "가입 중" : "회원가입"}
+          </AuthButton>
+        </div>
       </form>
     </AuthLayout>
   );
