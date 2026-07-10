@@ -31,10 +31,6 @@ export function AppRouter() {
         path={ROUTES.collectionDetail(":tagId")}
         element={<CollectionDetailPage />}
       />
-      <Route
-        path={ROUTES.collectionDetail(":tagId")}
-        element={<CollectionDetailPage />}
-      />
       <Route path={ROUTES.linkDetail(":linkId")} element={<LinkDetailPage />} />
       <Route path={ROUTES.myPage} element={<MyPage />} />
       <Route path="*" element={<NotFoundPage />} />
