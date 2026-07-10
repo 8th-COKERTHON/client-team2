@@ -1,6 +1,7 @@
 import { apiClient } from "@/services/apiClient";
 
 import type {
+  ChecklistCheckResponse,
   ChecklistResponse,
   CreateChecklistRequest,
 } from "@/features/link/api/types";
@@ -13,4 +14,16 @@ export async function createChecklist(
     method: "POST",
     body: requestBody,
   });
+}
+
+export async function toggleChecklist(
+  bookmarkId: string,
+  checklistId: string,
+): Promise<ChecklistCheckResponse> {
+  return apiClient<ChecklistCheckResponse>(
+    `/api/bookmarks/${bookmarkId}/checklists/${checklistId}/check`,
+    {
+      method: "POST",
+    },
+  );
 }

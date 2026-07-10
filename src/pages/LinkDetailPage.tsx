@@ -5,13 +5,19 @@ import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { AppTopBar } from "@/components/ui/AppTopBar";
 import { MobileScreen } from "@/components/ui/MobileScreen";
 import { ROUTES } from "@/constants/routes";
+import { getBookmarkDetail } from "@/features/link/api/bookmarkApi";
+import { createChecklist, toggleChecklist } from "@/features/link/api/checklistApi";
 import {
   getStoredBookmark,
   updateStoredBookmarkChecklist,
 } from "@/features/link/api/localBookmarkStorage";
 import { getMockBookmarkDetail } from "@/features/link/api/mockLinks";
 import { TagBadge } from "@/features/link/components/TagBadge";
-import type { ChecklistItem } from "@/features/link/types";
+import type { Bookmark, ChecklistItem } from "@/features/link/types";
+import {
+  isServerId,
+  mapBookmarkDetailResponseToBookmark,
+} from "@/features/link/utils";
 import { ScoreUnderline } from "@/features/user/components/GradeSummaryCard";
 
 const MAX_CHECKLIST_COUNT = 5;
@@ -133,10 +139,18 @@ export function LinkDetailPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const locationState = location.state as LinkDetailLocationState | null;
-  const bookmark =
-    getStoredBookmark(linkId ?? "") ?? getMockBookmarkDetail(linkId ?? "");
+  const [bookmark, setBookmark] = useState<Bookmark | null>(() => {
+    if (!linkId) {
+      return null;
+    }
+
+    return getStoredBookmark(linkId) ?? getMockBookmarkDetail(linkId) ?? null;
+  });
   const [checklist, setChecklist] = useState<ChecklistItem[]>(
     () => bookmark?.checklist ?? [],
+  );
+  const [isLoadingBookmark, setIsLoadingBookmark] = useState(() =>
+    linkId ? isServerId(linkId) : false,
   );
   const [draftTitle, setDraftTitle] = useState("");
   const [isEditingChecklist, setIsEditingChecklist] = useState(false);
@@ -148,6 +162,49 @@ export function LinkDetailPage() {
     [checklist],
   );
   const canAddChecklist = checklist.length < MAX_CHECKLIST_COUNT;
+
+  useEffect(() => {
+    if (!linkId || !isServerId(linkId)) {
+      return;
+    }
+
+    const targetLinkId = linkId;
+    let isMounted = true;
+
+    async function fetchBookmarkDetail(): Promise<void> {
+      setIsLoadingBookmark(true);
+
+      try {
+        const response = await getBookmarkDetail(targetLinkId);
+        const nextBookmark = mapBookmarkDetailResponseToBookmark(response);
+
+        if (isMounted) {
+          setBookmark(nextBookmark);
+          setChecklist(nextBookmark.checklist);
+        }
+      } catch {
+        const fallbackBookmark =
+          getStoredBookmark(targetLinkId) ??
+          getMockBookmarkDetail(targetLinkId) ??
+          null;
+
+        if (isMounted) {
+          setBookmark(fallbackBookmark);
+          setChecklist(fallbackBookmark?.checklist ?? []);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingBookmark(false);
+        }
+      }
+    }
+
+    void fetchBookmarkDetail();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [linkId]);
 
   useEffect(() => {
     if (!locationState?.shouldShowEditSuccessToast) {
@@ -168,6 +225,19 @@ export function LinkDetailPage() {
 
     return () => window.clearTimeout(timeoutId);
   }, [showEditSuccessToast]);
+
+  if (isLoadingBookmark && !bookmark) {
+    return (
+      <MobileScreen>
+        <AppTopBar title="링크 상세" />
+        <div className="px-5 pt-20 text-center">
+          <p className="typo-kr-body-medium text-grayscale-300">
+            링크를 불러오는 중이에요.
+          </p>
+        </div>
+      </MobileScreen>
+    );
+  }
 
   if (!bookmark) {
     return (
@@ -194,12 +264,24 @@ export function LinkDetailPage() {
         item.id === itemId ? { ...item, isCompleted: !item.isCompleted } : item,
       );
 
-      if (bookmark) {
+      if (bookmark && !isServerId(bookmark.id)) {
         updateStoredBookmarkChecklist(bookmark.id, nextChecklist);
       }
 
       return nextChecklist;
     });
+
+    if (isServerId(bookmark.id) && isServerId(itemId)) {
+      void toggleChecklist(bookmark.id, itemId).catch(() => {
+        setChecklist((current) =>
+          current.map((item) =>
+            item.id === itemId
+              ? { ...item, isCompleted: !item.isCompleted }
+              : item,
+          ),
+        );
+      });
+    }
   };
 
   const handleAddChecklistItem = (): void => {
@@ -209,23 +291,47 @@ export function LinkDetailPage() {
       return;
     }
 
+    const newChecklistItem: ChecklistItem = {
+      id: `local-${Date.now()}`,
+      title,
+      isCompleted: false,
+    };
+
     setChecklist((current) => {
       const nextChecklist = [
         ...current,
-        {
-          id: `local-${Date.now()}`,
-          title,
-          isCompleted: false,
-        },
+        newChecklistItem,
       ];
 
-      if (bookmark) {
+      if (bookmark && !isServerId(bookmark.id)) {
         updateStoredBookmarkChecklist(bookmark.id, nextChecklist);
       }
 
       return nextChecklist;
     });
     setDraftTitle("");
+
+    if (isServerId(bookmark.id)) {
+      void createChecklist(Number(bookmark.id), { content: title })
+        .then((createdChecklist) => {
+          setChecklist((current) =>
+            current.map((item) =>
+              item.id === newChecklistItem.id
+                ? {
+                    id: String(createdChecklist.checklistId),
+                    title: createdChecklist.content,
+                    isCompleted: createdChecklist.isChecked,
+                  }
+                : item,
+            ),
+          );
+        })
+        .catch(() => {
+          setChecklist((current) =>
+            current.filter((item) => item.id !== newChecklistItem.id),
+          );
+        });
+    }
   };
 
   const handleAddChecklistFromEnter = (

@@ -34,3 +34,21 @@ export type ChecklistResponse = {
   isChecked: boolean;
   createdAt: string;
 };
+
+export type ChecklistCheckResponse = {
+  checklistId: number;
+  bookmarkId: number;
+  content: string;
+  isChecked: boolean;
+  updatedAt: string;
+};
+
+export type BookmarkDetailResponse = {
+  bookmarkId: number;
+  title: string;
+  url: string;
+  remindAt?: string;
+  totalScore: number;
+  tags: TagResponse[];
+  checklists: ChecklistResponse[];
+};
