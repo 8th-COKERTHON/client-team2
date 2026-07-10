@@ -1,11 +1,24 @@
 import { AppRouter } from "@/app/router";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
+import { ROUTES } from "@/constants/routes";
+import { useLocation } from "react-router";
+
+const ROUTES_WITHOUT_BOTTOM_NAV = [
+  ROUTES.splash,
+  ROUTES.authEntry,
+  ROUTES.login,
+  ROUTES.signup,
+  ROUTES.signupComplete,
+];
 
 function App() {
+  const { pathname } = useLocation();
+  const shouldShowBottomNavigation = !ROUTES_WITHOUT_BOTTOM_NAV.includes(pathname);
+
   return (
-    <div className="pb-[104px]">
+    <div className={shouldShowBottomNavigation ? "pb-[104px]" : undefined}>
       <AppRouter />
-      <BottomNavigation />
+      {shouldShowBottomNavigation ? <BottomNavigation /> : null}
     </div>
   );
 }
