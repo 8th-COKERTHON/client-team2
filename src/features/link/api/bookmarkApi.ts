@@ -15,6 +15,16 @@ export async function createBookmark(
   });
 }
 
+export async function updateBookmark(
+  bookmarkId: string,
+  requestBody: BookmarkRequest,
+): Promise<BookmarkResponse> {
+  return apiClient<BookmarkResponse>(`/api/bookmarks/${bookmarkId}`, {
+    method: "PATCH",
+    body: requestBody,
+  });
+}
+
 export async function getBookmarkDetail(
   bookmarkId: string,
 ): Promise<BookmarkDetailResponse> {
