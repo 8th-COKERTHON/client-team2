@@ -5,5 +5,5 @@ if (!apiBaseUrl) {
 }
 
 export const env = {
-  apiBaseUrl,
+  apiBaseUrl: apiBaseUrl || "https://cokerthon-team2.p-e.kr",
 } as const;
