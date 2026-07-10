@@ -478,34 +478,14 @@ export function HomePage() {
                 />
               ))}
             </div>
-
-            {hasBookmarks && collectionTags.length > 0 ? (
-              <div className="mt-[15px] grid grid-cols-2 gap-x-[15px] gap-y-[15px]">
-                {collectionTags.map((tag) => {
-                  const sampleBookmark = bookmarkByTagId[tag.id];
-
-                  if (!sampleBookmark) {
-                    return null;
-                  }
-
-                  return (
-                    <CollectionCard
-                      key={tag.id}
-                      tag={tag}
-                      count={tag.count}
-                      sample={sampleBookmark}
-                    />
-                  );
-                })}
-              </div>
-            ) : (
-              <EmptyState
-                message="북마크한 링크가 없어요."
-                className="mt-[15px] h-[308px]"
-              />
-            )}
-          </section>
-        </div>
+          ) : (
+            <EmptyState
+              message="북마크한 링크가 없어요."
+              className="mt-[15px] h-[308px]"
+            />
+          )}
+        </section>
+      </div>
       )}
 
       {isSearchActive ? (
