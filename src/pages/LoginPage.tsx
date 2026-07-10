@@ -58,7 +58,7 @@ export function LoginPage() {
   return (
     <AuthLayout>
       <section className="flex flex-col items-start gap-2">
-        <LogoPlaceholder size="sm" />
+        <LogoPlaceholder />
         <h1 className="typo-kr-heading-semibold text-grayscale-900">로그인</h1>
       </section>
 

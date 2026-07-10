@@ -1,17 +1,12 @@
-type LogoPlaceholderProps = {
-  size?: "sm" | "lg";
-};
+import logo from "@/assets/icons/character_auth.png";
 
-export function LogoPlaceholder({ size = "lg" }: LogoPlaceholderProps) {
-  const sizeClass = size === "lg" ? "size-[134px]" : "size-20";
-
+export function LogoPlaceholder() {
   return (
-    <div
-      className={`${sizeClass} flex items-center justify-center rounded-2xl bg-grayscale-100 text-grayscale-300`}
-      aria-label="임시 로고"
-      role="img"
-    >
-      <span className="typo-kr-caption-regular">Logo</span>
-    </div>
+    <img
+      src={logo}
+      alt="logo"
+      aria-label="로고"
+      className="h-[78px] w-[58px]"
+    />
   );
 }

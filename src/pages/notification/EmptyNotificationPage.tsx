@@ -1,4 +1,4 @@
-import CharacterImg from "@/assets/icons/character2.png";
+import CharacterImg from "@/assets/icons/character_push1.png";
 
 export default function EmptyNotificationPage() {
   return (
