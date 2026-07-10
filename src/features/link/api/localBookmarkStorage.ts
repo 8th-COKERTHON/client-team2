@@ -1,6 +1,8 @@
 import type { Bookmark, Tag } from "@/features/link/types";
 
 const BOOKMARK_STORAGE_KEY = "remine.bookmarks";
+const DEFAULT_CHECKLIST_TITLE = "링크 열람하기";
+const MAX_CHECKLIST_COUNT = 5;
 
 export type CreateBookmarkInput = {
   title: string;
@@ -87,6 +89,27 @@ function normalizeBookmarkTags(bookmark: Bookmark): Bookmark {
   };
 }
 
+function normalizeBookmarkChecklist(bookmark: Bookmark): Bookmark {
+  if (bookmark.checklist.length > 0) {
+    return bookmark;
+  }
+
+  return {
+    ...bookmark,
+    checklist: [
+      {
+        id: "default-open-link",
+        title: DEFAULT_CHECKLIST_TITLE,
+        isCompleted: false,
+      },
+    ],
+  };
+}
+
+function normalizeBookmark(bookmark: Bookmark): Bookmark {
+  return normalizeBookmarkChecklist(normalizeBookmarkTags(bookmark));
+}
+
 function isSameTagId(storedTagId: string, routeTagId: string): boolean {
   return decodeTagId(storedTagId) === decodeTagId(routeTagId);
 }
@@ -121,7 +144,7 @@ export function getStoredBookmarks(): Bookmark[] {
       return [];
     }
 
-    return parsedBookmarks.filter(isBookmark).map(normalizeBookmarkTags);
+    return parsedBookmarks.filter(isBookmark).map(normalizeBookmark);
   } catch {
     return [];
   }
@@ -168,6 +191,34 @@ export function deleteStoredBookmark(bookmarkId: string): void {
   );
 
   window.localStorage.setItem(BOOKMARK_STORAGE_KEY, JSON.stringify(bookmarks));
+}
+
+export function updateStoredBookmarkChecklist(
+  bookmarkId: string,
+  checklist: Bookmark["checklist"],
+): Bookmark | undefined {
+  const bookmarks = getStoredBookmarks();
+  const targetBookmark = bookmarks.find((bookmark) => bookmark.id === bookmarkId);
+
+  if (!targetBookmark) {
+    return undefined;
+  }
+
+  const updatedBookmark: Bookmark = {
+    ...targetBookmark,
+    checklist: checklist.slice(0, MAX_CHECKLIST_COUNT),
+  };
+
+  window.localStorage.setItem(
+    BOOKMARK_STORAGE_KEY,
+    JSON.stringify(
+      bookmarks.map((bookmark) =>
+        bookmark.id === bookmarkId ? updatedBookmark : bookmark,
+      ),
+    ),
+  );
+
+  return updatedBookmark;
 }
 
 export function updateStoredBookmark(
@@ -231,7 +282,13 @@ export function createStoredBookmark(input: CreateBookmarkInput): Bookmark {
     reminderAt: `${input.reminderDate} ${input.reminderTime}`,
     score: 0,
     tags,
-    checklist: [],
+    checklist: [
+      {
+        id: "default-open-link",
+        title: DEFAULT_CHECKLIST_TITLE,
+        isCompleted: false,
+      },
+    ],
   };
 
   const bookmarks = getStoredBookmarks();

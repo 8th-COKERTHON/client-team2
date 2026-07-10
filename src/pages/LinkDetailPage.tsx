@@ -1,16 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
+import type { KeyboardEvent } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 
 import { AppTopBar, MoreIcon } from "@/components/ui/AppTopBar";
 import { MobileScreen } from "@/components/ui/MobileScreen";
 import { ROUTES } from "@/constants/routes";
-import { getStoredBookmark } from "@/features/link/api/localBookmarkStorage";
+import {
+  getStoredBookmark,
+  updateStoredBookmarkChecklist,
+} from "@/features/link/api/localBookmarkStorage";
 import { getMockBookmarkDetail } from "@/features/link/api/mockLinks";
 import { TagBadge } from "@/features/link/components/TagBadge";
 import type { ChecklistItem } from "@/features/link/types";
 import { ScoreUnderline } from "@/features/user/components/GradeSummaryCard";
 
 const MAX_CHECKLIST_COUNT = 5;
+const CHECKLIST_SCORE_REWARD = 4;
 
 function CalendarIcon() {
   return (
@@ -63,6 +68,25 @@ function SuccessIcon() {
         fill="none"
         stroke="white"
         strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ChecklistCompleteMark() {
+  return (
+    <svg
+      viewBox="0 0 38 37"
+      className="absolute -top-1.5 -left-3 size-[38px] text-main"
+      aria-hidden="true"
+    >
+      <path
+        d="M8.6 28.4C4.1 23.8 4.7 15.3 10.1 10.5C15.7 5.5 25.2 6 29.2 12.4C32.8 18.2 29.7 26.8 23.2 30.1C16.7 33.3 8.3 31.2 5.3 24.9M8.7 20.3C10.5 22.4 12.5 24.2 14.7 26C19.7 19.8 24.7 13.8 30.3 8.2"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.4"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -134,11 +158,17 @@ export function LinkDetailPage() {
   }
 
   const handleToggleChecklistItem = (itemId: string): void => {
-    setChecklist((current) =>
-      current.map((item) =>
+    setChecklist((current) => {
+      const nextChecklist = current.map((item) =>
         item.id === itemId ? { ...item, isCompleted: !item.isCompleted } : item,
-      ),
-    );
+      );
+
+      if (bookmark) {
+        updateStoredBookmarkChecklist(bookmark.id, nextChecklist);
+      }
+
+      return nextChecklist;
+    });
   };
 
   const handleAddChecklistItem = (): void => {
@@ -148,16 +178,59 @@ export function LinkDetailPage() {
       return;
     }
 
-    setChecklist((current) => [
-      ...current,
-      {
-        id: `local-${Date.now()}`,
-        title,
-        isCompleted: false,
-      },
-    ]);
+    setChecklist((current) => {
+      const nextChecklist = [
+        ...current,
+        {
+          id: `local-${Date.now()}`,
+          title,
+          isCompleted: false,
+        },
+      ];
+
+      if (bookmark) {
+        updateStoredBookmarkChecklist(bookmark.id, nextChecklist);
+      }
+
+      return nextChecklist;
+    });
     setDraftTitle("");
   };
+
+  const handleAddChecklistFromEnter = (
+    event: KeyboardEvent<HTMLInputElement>,
+  ): void => {
+    if (event.key !== "Enter") {
+      return;
+    }
+
+    event.preventDefault();
+    handleAddChecklistItem();
+  };
+
+  const renderChecklistItem = (item: ChecklistItem, index: number) => (
+    <li
+      key={item.id}
+      className="relative flex min-h-[30px] items-center justify-between text-[16px] leading-[1.5] font-medium"
+    >
+      {item.isCompleted ? <ChecklistCompleteMark /> : null}
+      <button
+        type="button"
+        onClick={() => handleToggleChecklistItem(item.id)}
+        className={`relative min-w-0 flex-1 text-left ${
+          item.isCompleted ? "text-[#1c1c1a] line-through" : "text-[#1c1c1a]"
+        }`}
+      >
+        <span className="mr-1">{index + 1}.</span>
+        {item.title}
+      </button>
+      {item.isCompleted ? (
+        <span className="ml-3 shrink-0 text-[20px] leading-[1.5] font-normal tracking-[-0.6px] text-main">
+          {CHECKLIST_SCORE_REWARD}점
+        </span>
+      ) : null}
+    </li>
+  );
 
   return (
     <MobileScreen>
@@ -238,22 +311,8 @@ export function LinkDetailPage() {
             <MoreIcon />
           </div>
 
-          <ol className="mt-2.5 flex list-decimal flex-col gap-2 pl-6">
-            {checklist.map((item) => (
-              <li key={item.id} className="text-[16px] leading-[1.5] font-medium">
-                <button
-                  type="button"
-                  onClick={() => handleToggleChecklistItem(item.id)}
-                  className={`text-left ${
-                    item.isCompleted
-                      ? "text-grayscale-100 line-through"
-                      : "text-[#1c1c1a]"
-                  }`}
-                >
-                  {item.title}
-                </button>
-              </li>
-            ))}
+          <ol className="mt-2.5 flex flex-col gap-2">
+            {checklist.map(renderChecklistItem)}
           </ol>
 
           {canAddChecklist ? (
@@ -261,6 +320,7 @@ export function LinkDetailPage() {
               <input
                 value={draftTitle}
                 onChange={(event) => setDraftTitle(event.target.value)}
+                onKeyDown={handleAddChecklistFromEnter}
                 placeholder="새 항목 추가 (최대 5개)"
                 className="min-w-0 flex-1 bg-transparent text-[16px] leading-[1.5] font-medium text-grayscale-200 outline-none placeholder:text-grayscale-200"
                 aria-label="새 체크리스트 항목"
