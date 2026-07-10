@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 
-import { AppTopBar, MoreIcon } from "@/components/ui/AppTopBar";
+import { AppTopBar } from "@/components/ui/AppTopBar";
 import { MobileScreen } from "@/components/ui/MobileScreen";
 import { ROUTES } from "@/constants/routes";
 import {
@@ -48,7 +48,18 @@ function PencilIcon() {
   return (
     <svg viewBox="0 0 24 24" className="size-6" aria-hidden="true">
       <path
-        d="M5 19h4.2L18.4 9.8a2 2 0 0 0 0-2.8L17 5.6a2 2 0 0 0-2.8 0L5 14.8V19ZM13.5 7.5l3 3"
+        d="M5.2 16.9 4.5 20l3.1-.7L18.2 8.7l-2.4-2.4L5.2 16.9ZM17.1 5l2.4 2.4.7-.7a1.7 1.7 0 0 0 0-2.4l-.1-.1a1.7 1.7 0 0 0-2.4 0l-.6.8Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-6" aria-hidden="true">
+      <path
+        d="M5.5 12.4 9.4 16.3 18.5 7.2"
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
@@ -128,6 +139,7 @@ export function LinkDetailPage() {
     () => bookmark?.checklist ?? [],
   );
   const [draftTitle, setDraftTitle] = useState("");
+  const [isEditingChecklist, setIsEditingChecklist] = useState(false);
   const [showEditSuccessToast, setShowEditSuccessToast] = useState(
     () => Boolean(locationState?.shouldShowEditSuccessToast),
   );
@@ -238,15 +250,19 @@ export function LinkDetailPage() {
         className="relative min-w-0 flex-1 text-left text-[#1c1c1a]"
       >
         <span className="relative mr-1 inline-flex min-w-5 justify-center">
-          {item.isCompleted ? <ChecklistNumberMark /> : null}
+          {item.isCompleted && !isEditingChecklist ? (
+            <ChecklistNumberMark />
+          ) : null}
           <span className="relative">{index + 1}.</span>
         </span>
         <span className="relative inline-block">
           {item.title}
-          {item.isCompleted ? <ChecklistTextUnderline /> : null}
+          {item.isCompleted && !isEditingChecklist ? (
+            <ChecklistTextUnderline />
+          ) : null}
         </span>
       </button>
-      {item.isCompleted ? (
+      {item.isCompleted && !isEditingChecklist ? (
         <span className="ml-3 shrink-0 text-[20px] leading-[1.5] font-normal tracking-[-0.6px] text-main">
           {CHECKLIST_SCORE_REWARD}점
         </span>
@@ -330,14 +346,25 @@ export function LinkDetailPage() {
                 {completedCount}/{checklist.length}
               </p>
             </div>
-            <MoreIcon />
+            <button
+              type="button"
+              onClick={() => setIsEditingChecklist((current) => !current)}
+              className={`flex size-6 items-center justify-center ${
+                isEditingChecklist ? "text-main" : "text-grayscale-200"
+              }`}
+              aria-label={
+                isEditingChecklist ? "체크리스트 수정 완료" : "체크리스트 수정"
+              }
+            >
+              {isEditingChecklist ? <CheckIcon /> : <PencilIcon />}
+            </button>
           </div>
 
           <ol className="mt-2.5 flex flex-col gap-2">
             {checklist.map(renderChecklistItem)}
           </ol>
 
-          {canAddChecklist ? (
+          {isEditingChecklist && canAddChecklist ? (
             <div className="mt-2 flex items-center gap-2 pl-6">
               <input
                 value={draftTitle}
