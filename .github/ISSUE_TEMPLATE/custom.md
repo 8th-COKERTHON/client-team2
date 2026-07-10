@@ -1,10 +1,9 @@
 ---
 name: Custom issue template
 about: Describe this issue template's purpose here.
-title: ''
-labels: ''
-assignees: ''
-
+title: ""
+labels: ""
+assignees: ""
 ---
 
 name: Task
@@ -27,9 +26,9 @@ assignees: “”
 
 ✅ 작업 목록
 
-* [ ]
-* [ ]
-* [ ]
+- [ ]
+- [ ]
+- [ ]
 
 ⸻
 
