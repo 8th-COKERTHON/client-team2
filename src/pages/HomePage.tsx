@@ -5,6 +5,7 @@ import emptyCharacter from "@/assets/icons/character2.png";
 import { ROUTES } from "@/constants/routes";
 import { getStoredBookmarks } from "@/features/link/api/localBookmarkStorage";
 import type { Bookmark, Tag } from "@/features/link/types";
+import { ScoreUnderline } from "@/features/user/components/GradeSummaryCard";
 
 const DEFAULT_PREVIEW_TAGS = ["태그", "태그", "태그"];
 
@@ -256,11 +257,11 @@ export function HomePage() {
     <main className="mx-auto min-h-screen w-full max-w-[430px] bg-grayscale-000 pb-[140px] text-grayscale-900">
       <header className="fixed top-0 right-0 left-0 z-40 mx-auto w-full max-w-[430px] bg-grayscale-000 px-5 pt-[60px]">
         <div className="flex h-[50px] items-center justify-between">
-          <div className="relative">
-            <p className="text-[40px] leading-[1.5] font-normal text-main">
+          <div>
+            <p className="relative text-[40px] leading-[1.5] font-normal text-main">
               90점
+              <ScoreUnderline />
             </p>
-            <span className="absolute bottom-2 left-0 h-2 w-24 rounded-full bg-main-100" />
           </div>
 
           <div className="flex items-center gap-4 text-grayscale-800">

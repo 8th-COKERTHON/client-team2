@@ -221,6 +221,7 @@ export function LinkEditPage() {
       tags: submitTags,
     });
     navigate(ROUTES.linkDetail(bookmark.id), {
+      replace: true,
       state: { shouldShowEditSuccessToast: true },
     });
   };

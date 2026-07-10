@@ -8,6 +8,7 @@ import { getStoredBookmark } from "@/features/link/api/localBookmarkStorage";
 import { getMockBookmarkDetail } from "@/features/link/api/mockLinks";
 import { TagBadge } from "@/features/link/components/TagBadge";
 import type { ChecklistItem } from "@/features/link/types";
+import { ScoreUnderline } from "@/features/user/components/GradeSummaryCard";
 
 const MAX_CHECKLIST_COUNT = 5;
 
@@ -177,9 +178,8 @@ export function LinkDetailPage() {
         <div className="relative h-[71px]">
           <p className="absolute top-0 left-0 text-[40px] leading-[1.5] font-normal text-main">
             {bookmark.score}점
+            <ScoreUnderline />
           </p>
-          <span className="absolute top-[51px] left-0 h-2 w-[119px] rounded-full bg-main-200" />
-          <span className="absolute top-[42px] left-2 h-3 w-[88px] rounded-full bg-main-100" />
         </div>
       </section>
 
