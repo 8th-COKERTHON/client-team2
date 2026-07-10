@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 import { ROUTES } from "@/constants/routes";
 import { signup } from "@/features/auth/api/authApi";
@@ -108,9 +108,13 @@ export function SignupPage() {
 
         <div className="typo-kr-detail-medium mt-6 flex gap-[7px] px-1">
           <span className="text-grayscale-300">계정이 있으신가요?</span>
-          <Link to={ROUTES.login} className="typo-kr-detail-semibold text-main">
+          <button
+            type="button"
+            onClick={() => navigate(ROUTES.login)}
+            className="typo-kr-detail-semibold text-main"
+          >
             로그인
-          </Link>
+          </button>
         </div>
 
         {submitErrorMessage ? (

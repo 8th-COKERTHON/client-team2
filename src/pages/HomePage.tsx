@@ -282,6 +282,21 @@ function EmptyState({ message, className = "" }: EmptyStateProps) {
   );
 }
 
+function TodayArchiveCompleteState() {
+  return (
+    <div className="mt-[15px] flex h-[180px] flex-col items-center justify-center px-[82px]">
+      <img
+        src={emptyCharacter}
+        alt=""
+        className="h-[157px] w-[111px] object-contain"
+      />
+      <p className="whitespace-nowrap text-[14px] leading-[1.5] font-semibold tracking-[-0.35px] text-grayscale-300">
+        오늘 추천 할 일을 완료했어요.
+      </p>
+    </div>
+  );
+}
+
 function doesBookmarkMatchQuery(bookmark: Bookmark, query: string): boolean {
   const normalizedQuery = query.trim().toLowerCase();
 
@@ -312,6 +327,13 @@ export function HomePage() {
   const homeData = apiHomeData ?? fallbackHomeData;
   const todayArchiveItems = homeData.todayArchive;
   const hasCollections = homeData.collections.length > 0;
+  const hasCompletedTodayArchive =
+    todayArchiveItems.length > 0 &&
+    todayArchiveItems.every(
+      (archiveItem) =>
+        archiveItem.totalChecklistCount > 0 &&
+        archiveItem.checkedCount >= archiveItem.totalChecklistCount,
+    );
   const searchResults = useMemo(
     () =>
       isSearchActive
@@ -409,7 +431,9 @@ export function HomePage() {
               Today’s Archive
             </h1>
           </div>
-          {todayArchiveItems.length > 0 ? (
+          {hasCompletedTodayArchive ? (
+            <TodayArchiveCompleteState />
+          ) : todayArchiveItems.length > 0 ? (
             <div className="mt-[15px] flex gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {todayArchiveItems.map((bookmark) => (
                 <ArchiveCard key={bookmark.id} archiveItem={bookmark} />
