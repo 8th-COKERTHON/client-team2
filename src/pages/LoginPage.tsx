@@ -97,13 +97,11 @@ export function LoginPage() {
           </Link>
         </div>
 
-        <AuthButton
-          type="submit"
-          disabled={!canSubmit}
-          className="absolute right-4 bottom-[56px] left-4 w-auto"
-        >
-          {isSubmitting ? "로그인 중" : "로그인"}
-        </AuthButton>
+        <div className="absolute right-4 bottom-[56px] left-4">
+          <AuthButton type="submit" disabled={!canSubmit}>
+            {isSubmitting ? "로그인 중" : "로그인"}
+          </AuthButton>
+        </div>
       </form>
     </AuthLayout>
   );

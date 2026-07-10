@@ -2,7 +2,7 @@ import { LogoPlaceholder } from "@/features/auth/components/LogoPlaceholder";
 
 export function SplashPage() {
   return (
-    <main className="min-h-dvh bg-grayscale-background">
+    <main className="min-h-dvh bg-grayscale-800">
       <div className="relative mx-auto flex min-h-dvh w-full max-w-[375px] flex-col items-center bg-grayscale-background px-5 pt-[162px] pb-[56px]">
         <LogoPlaceholder />
 
