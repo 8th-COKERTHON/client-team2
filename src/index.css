@@ -1,11 +1,244 @@
 @import "tailwindcss";
 
+@theme {
+  --font-pretendard:
+    Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+  --font-poppins: Poppins, Inter, system-ui, sans-serif;
+
+  --color-main-100: #ffedec;
+  --color-main-200: #ffb8b4;
+  --color-main-300: #ff837c;
+  --color-main-400: #f55e56;
+  --color-main-500: #e5372e;
+  --color-main-600: #b7251e;
+  --color-main-700: #8d1610;
+  --color-main-800: #640c07;
+  --color-main: var(--color-main-500);
+  --color-main-sub: var(--color-main-400);
+
+  --color-grayscale-white: #ffffff;
+  --color-grayscale-background: #f9f9f9;
+  --color-grayscale-000: #f6f6f6;
+  --color-grayscale-050: #e9e9e9;
+  --color-grayscale-100: #b7b8bb;
+  --color-grayscale-200: #939599;
+  --color-grayscale-300: #6f7277;
+  --color-grayscale-400: #5e6165;
+  --color-grayscale-500: #4c5053;
+  --color-grayscale-600: #3f4145;
+  --color-grayscale-700: #313236;
+  --color-grayscale-800: #25262a;
+  --color-grayscale-900: #0c0c0e;
+  --color-background: var(--color-grayscale-background);
+
+  --color-error-000: #fdedef;
+  --color-error-100: #fad1d7;
+  --color-error-200: #f6a2af;
+  --color-error-300: #f17487;
+  --color-error-400: #ed455f;
+  --color-error-500: #e81737;
+  --color-error-600: #ba122c;
+  --color-error-700: #8b0e21;
+  --color-error-800: #5d0916;
+  --color-error-900: #2e050b;
+  --color-error: var(--color-error-500);
+
+  --color-correct-000: #f1fcf8;
+  --color-correct-100: #dcf8ee;
+  --color-correct-200: #b8f1dd;
+  --color-correct-300: #95eacc;
+  --color-correct-400: #71e3bb;
+  --color-correct-500: #4edcaa;
+  --color-correct-600: #3eb088;
+  --color-correct-700: #2f8566;
+  --color-correct-800: #1f5945;
+  --color-correct-900: #102e23;
+  --color-correct: var(--color-correct-500);
+
+  --color-subcolor-000: #f3faff;
+  --color-subcolor-100: #e2f3ff;
+  --color-subcolor-200: #c5e7ff;
+  --color-subcolor-300: #a7daff;
+  --color-subcolor-400: #8aceff;
+  --color-subcolor-500: #6dc2ff;
+  --color-subcolor-600: #57a3da;
+  --color-subcolor-700: #4184b4;
+  --color-subcolor-800: #2c668f;
+  --color-subcolor-900: #164769;
+  --color-subcolor: var(--color-subcolor-500);
+}
+
 html {
-  background-color: #ffffff;
+  background-color: var(--color-grayscale-white);
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  color: var(--color-grayscale-900);
+  background-color: var(--color-grayscale-white);
+  font-family: var(--font-pretendard);
+}
+
+@layer components {
+  .typo-kr-heading-bold {
+    font-family: var(--font-pretendard);
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 150%;
+    letter-spacing: 0;
+  }
+
+  .typo-kr-heading-semibold {
+    font-family: var(--font-pretendard);
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 150%;
+    letter-spacing: 0;
+  }
+
+  .typo-kr-title-medium {
+    font-family: var(--font-pretendard);
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 150%;
+    letter-spacing: 0;
+  }
+
+  .typo-kr-body-medium {
+    font-family: var(--font-pretendard);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 150%;
+    letter-spacing: 0;
+  }
+
+  .typo-kr-body-regular {
+    font-family: var(--font-pretendard);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 150%;
+    letter-spacing: 0;
+  }
+
+  .typo-kr-detail-bold {
+    font-family: var(--font-pretendard);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 150%;
+    letter-spacing: 0;
+  }
+
+  .typo-kr-detail-semibold {
+    font-family: var(--font-pretendard);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 150%;
+    letter-spacing: 0;
+  }
+
+  .typo-kr-detail-medium {
+    font-family: var(--font-pretendard);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 150%;
+    letter-spacing: 0;
+  }
+
+  .typo-kr-caption-medium {
+    font-family: var(--font-pretendard);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 150%;
+    letter-spacing: 0;
+  }
+
+  .typo-kr-caption-regular {
+    font-family: var(--font-pretendard);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 150%;
+    letter-spacing: 0;
+  }
+
+  .typo-kr-caption-small {
+    font-family: var(--font-pretendard);
+    font-size: 10px;
+    font-weight: 400;
+    line-height: 150%;
+    letter-spacing: 0;
+  }
+
+  .typo-kr-heading-compact {
+    font-family: var(--font-pretendard);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 20px;
+    letter-spacing: 0;
+  }
+
+  .typo-en-heading-semibold {
+    font-family: var(--font-poppins);
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 150%;
+    letter-spacing: 0;
+  }
+
+  .typo-en-title-semibold {
+    font-family: var(--font-poppins);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 150%;
+    letter-spacing: 0;
+  }
+
+  .typo-en-body-semibold {
+    font-family: var(--font-poppins);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 150%;
+    letter-spacing: 0;
+  }
+
+  .typo-en-body-medium {
+    font-family: var(--font-poppins);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 150%;
+    letter-spacing: 0;
+  }
+
+  .typo-en-detail-bold {
+    font-family: var(--font-poppins);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 150%;
+    letter-spacing: 0;
+  }
+
+  .typo-en-detail-medium {
+    font-family: var(--font-poppins);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 150%;
+    letter-spacing: 0;
+  }
+
+  .typo-en-caption-regular {
+    font-family: var(--font-poppins);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 150%;
+    letter-spacing: 0;
+  }
+
+  .typo-en-caption-small {
+    font-family: var(--font-poppins);
+    font-size: 10px;
+    font-weight: 400;
+    line-height: 150%;
+    letter-spacing: 0;
+  }
 }
