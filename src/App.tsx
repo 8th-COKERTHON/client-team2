@@ -10,6 +10,7 @@ const ROUTES_WITHOUT_BOTTOM_NAV: string[] = [
   ROUTES.login,
   ROUTES.signup,
   ROUTES.signupComplete,
+  ROUTES.linkCreate,
 ];
 
 function App() {
