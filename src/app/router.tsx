@@ -26,15 +26,15 @@ export function AppRouter() {
       <Route path={ROUTES.signup} element={<SignupPage />} />
       <Route path={ROUTES.signupComplete} element={<SignupCompletePage />} />
       <Route path={ROUTES.linkCreate} element={<LinkCreatePage />} />
-<<<<<<< HEAD
       <Route path={ROUTES.linkEdit(":linkId")} element={<LinkEditPage />} />
-      <Route path={ROUTES.collectionDetail(":tagId")} element={<CollectionDetailPage />} />
-=======
       <Route
         path={ROUTES.collectionDetail(":tagId")}
         element={<CollectionDetailPage />}
       />
->>>>>>> 5bfebcb79ca02bcdfdc09a67f60af6b6dd253663
+      <Route
+        path={ROUTES.collectionDetail(":tagId")}
+        element={<CollectionDetailPage />}
+      />
       <Route path={ROUTES.linkDetail(":linkId")} element={<LinkDetailPage />} />
       <Route path={ROUTES.myPage} element={<MyPage />} />
       <Route path="*" element={<NotFoundPage />} />
