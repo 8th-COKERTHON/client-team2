@@ -4,7 +4,6 @@ import { useNavigate } from "react-router";
 import { MobileScreen } from "@/components/ui/MobileScreen";
 import { ROUTES } from "@/constants/routes";
 import { createBookmark } from "@/features/link/api/bookmarkApi";
-import { createChecklist } from "@/features/link/api/checklistApi";
 import { createReminderDateTime } from "@/features/link/utils";
 
 const MAX_TAG_COUNT = 5;
@@ -149,15 +148,12 @@ export function LinkCreatePage() {
       setIsSubmitting(true);
       setSubmitErrorMessage("");
 
-      const createdBookmark = await createBookmark({
+      await createBookmark({
         title: title.trim(),
         url: url.trim(),
         remindAt: createReminderDateTime(reminderDate, reminderTime),
         tags: submitTags,
-      });
-
-      await createChecklist(createdBookmark.bookmarkId, {
-        content: DEFAULT_CHECKLIST_CONTENT,
+        checklists: [DEFAULT_CHECKLIST_CONTENT],
       });
 
       navigate(ROUTES.home);

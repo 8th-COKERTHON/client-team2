@@ -1,8 +1,8 @@
-// import { AppRouter } from "@/app/router";
-import { BottomNavigation } from "@/components/layout/BottomNavigation";
-import { AppRouter } from "./app/router";
-import { ROUTES } from "@/constants/routes";
 import { useLocation } from "react-router";
+
+import { AppRouter } from "@/app/router";
+import { BottomNavigation } from "@/components/layout/BottomNavigation";
+import { ROUTES } from "@/constants/routes";
 
 const ROUTES_WITHOUT_BOTTOM_NAV: string[] = [
   ROUTES.splash,

@@ -1,6 +1,7 @@
 import type { Bookmark } from "@/features/link/types";
 import type {
   BookmarkDetailResponse,
+  BookmarkMutationResponse,
   BookmarkResponse,
 } from "@/features/link/api/types";
 
@@ -42,26 +43,31 @@ export function mapBookmarkDetailResponseToBookmark(
   };
 }
 
-export function mapBookmarkResponseToBookmark(response: BookmarkResponse): Bookmark {
+export function mapBookmarkResponseToBookmark(
+  response: BookmarkMutationResponse | BookmarkResponse,
+): Bookmark {
+  const reminderAt = "remindAt" in response ? response.remindAt : undefined;
+  const viewedAt = "visitedAt" in response ? response.visitedAt : undefined;
+  const checklists = "checklists" in response ? (response.checklists ?? []) : [];
+
   return {
     id: String(response.bookmarkId),
     title: response.title,
     url: response.url,
     domain: getDomainFromUrl(response.url),
     purpose: response.title,
-    reminderAt: response.remindAt ?? "",
+    reminderAt: reminderAt ?? "",
     score: 0,
-    viewedAt: response.visitedAt,
+    viewedAt,
     tags: response.tags.map((tag) => ({
       id: tag.name,
       name: tag.name,
     })),
-    checklist:
-      response.checklists?.map((checklist) => ({
-        id: String(checklist.checklistId),
-        title: checklist.content,
-        isCompleted: checklist.isChecked,
-      })) ?? [],
+    checklist: checklists.map((checklist) => ({
+      id: String(checklist.checklistId),
+      title: checklist.content,
+      isCompleted: checklist.isChecked,
+    })),
   };
 }
 

@@ -2,15 +2,15 @@ import { apiClient } from "@/services/apiClient";
 
 import type {
   BookmarkDetailResponse,
+  BookmarkMutationResponse,
   BookmarkRequest,
-  BookmarkResponse,
   TagFilterResponse,
 } from "@/features/link/api/types";
 
 export async function createBookmark(
   requestBody: BookmarkRequest,
-): Promise<BookmarkResponse> {
-  return apiClient<BookmarkResponse>("/api/bookmarks", {
+): Promise<BookmarkMutationResponse> {
+  return apiClient<BookmarkMutationResponse>("/api/bookmarks", {
     method: "POST",
     body: requestBody,
   });
@@ -19,8 +19,8 @@ export async function createBookmark(
 export async function updateBookmark(
   bookmarkId: string,
   requestBody: BookmarkRequest,
-): Promise<BookmarkResponse> {
-  return apiClient<BookmarkResponse>(`/api/bookmarks/${bookmarkId}`, {
+): Promise<BookmarkMutationResponse> {
+  return apiClient<BookmarkMutationResponse>(`/api/bookmarks/${bookmarkId}`, {
     method: "PATCH",
     body: requestBody,
   });
@@ -40,14 +40,18 @@ export async function getBookmarksByTag(
   );
 }
 
-export async function visitBookmark(bookmarkId: string): Promise<BookmarkResponse> {
-  return apiClient<BookmarkResponse>(`/api/bookmarks/${bookmarkId}`, {
+export async function visitBookmark(
+  bookmarkId: string,
+): Promise<BookmarkMutationResponse> {
+  return apiClient<BookmarkMutationResponse>(`/api/bookmarks/${bookmarkId}`, {
     method: "POST",
   });
 }
 
-export async function deleteBookmark(bookmarkId: string): Promise<void> {
-  await apiClient<void>(`/api/bookmarks/${bookmarkId}`, {
+export async function deleteBookmark(
+  bookmarkId: string,
+): Promise<BookmarkMutationResponse> {
+  return apiClient<BookmarkMutationResponse>(`/api/bookmarks/${bookmarkId}`, {
     method: "DELETE",
   });
 }

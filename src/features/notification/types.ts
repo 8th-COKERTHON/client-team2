@@ -21,4 +21,24 @@ export interface NotificationsResponse {
   notifications: NotificationGroup[];
 }
 
+export interface CreatedNotificationResponse {
+  notificationId: number;
+  bookmarkId: number;
+  bookmarkTitle: string;
+  notificationCount: number;
+  reminderLevel: number;
+  title: string;
+  message: string;
+  incompleteChecklistCount: number;
+  nextReminderAt: string;
+  createdAt: string;
+}
+
+export interface NotificationGenerationResponse {
+  processedBookmarkCount: number;
+  createdNotificationCount: number;
+  notifications: CreatedNotificationResponse[];
+  message: string;
+}
+
 export type NotificationFilter = "all" | "unread";

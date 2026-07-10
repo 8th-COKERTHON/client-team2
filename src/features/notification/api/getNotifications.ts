@@ -1,4 +1,5 @@
 import type {
+  NotificationGenerationResponse,
   NotificationGroup,
   NotificationsResponse,
 } from "@/features/notification/types";
@@ -9,4 +10,10 @@ export async function getNotifications(): Promise<NotificationGroup[]> {
     await apiClient<NotificationsResponse>("/api/notifications");
 
   return response.notifications;
+}
+
+export async function generateNotifications(): Promise<NotificationGenerationResponse> {
+  return apiClient<NotificationGenerationResponse>("/api/notifications", {
+    method: "POST",
+  });
 }
