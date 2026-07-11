@@ -76,6 +76,7 @@ export default defineConfig({
 
       workbox: {
         cleanupOutdatedCaches: true,
+        importScripts: ["push-worker.js"],
         navigateFallback: "/index.html",
         globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,avif,woff,woff2}"],
       },
