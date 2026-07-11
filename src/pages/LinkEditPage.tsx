@@ -345,7 +345,6 @@ export function LinkEditPage() {
   return (
     <MobileScreen>
       <header className="sticky top-0 z-30 bg-grayscale-000">
-        <div className="flex h-[60px] items-end px-5 pb-2" aria-hidden="true" />
         <div className="grid h-[50px] grid-cols-[24px_1fr_24px] items-center px-5">
           <button
             type="button"

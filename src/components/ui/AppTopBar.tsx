@@ -48,7 +48,6 @@ export function AppTopBar({ title, leftSlot, rightSlot }: AppTopBarProps) {
 
   return (
     <header className="sticky top-0 z-30 bg-grayscale-000">
-      <div className="flex h-[60px] items-end px-5 pb-2" aria-hidden="true" />
       <div className="flex h-[50px] items-center justify-between px-5">
         <div className="flex size-6 items-center justify-center">
           {leftSlot ?? defaultLeftSlot}

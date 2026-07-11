@@ -17,7 +17,6 @@ export function MyPage() {
   return (
     <MobileScreen>
       <header className="bg-grayscale-000 sticky top-0 z-30">
-        <div className="flex h-[60px] items-end px-5 pb-2" aria-hidden="true" />
         <div className="flex h-[50px] items-center justify-center px-5">
           <h1 className="text-grayscale-800 max-w-[230px] truncate text-center text-[18px] leading-[1.5] font-semibold tracking-[-0.45px]">
             My 성적표

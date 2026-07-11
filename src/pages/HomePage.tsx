@@ -430,7 +430,7 @@ export function HomePage() {
 
   return (
     <main className="bg-grayscale-000 text-grayscale-900 mx-auto min-h-screen w-full max-w-[430px] pb-[140px]">
-      <header className="bg-grayscale-000 fixed top-0 right-0 left-0 z-40 mx-auto w-full max-w-[430px] px-5 pt-[60px]">
+      <header className="bg-grayscale-000 fixed top-0 right-0 left-0 z-40 mx-auto w-full max-w-[430px] px-5">
         <div className="flex h-[50px] items-center justify-between">
           <div>
             <p className="font-hakgyo text-main relative text-[40px] leading-[1.5]">
@@ -460,7 +460,7 @@ export function HomePage() {
       </header>
 
       {isSearchActive ? (
-        <div className="pt-[122px]">
+        <div className="pt-[62px]">
           {searchResults.length > 0 ? (
             <section className="overflow-hidden px-5">
               <div className="flex items-center gap-1">
@@ -494,7 +494,7 @@ export function HomePage() {
           )}
         </div>
       ) : (
-        <div className="pt-[122px]">
+        <div className="pt-[62px]">
           <section className="overflow-hidden">
             <div className="px-5">
               <h1 className="font-poppins text-[16px] leading-[1.5] font-semibold text-black">
@@ -551,7 +551,7 @@ export function HomePage() {
       )}
 
       {isSearchActive ? (
-        <div className="fixed top-[433px] right-0 left-0 z-50 mx-auto flex w-full max-w-[430px] items-center justify-center gap-3">
+        <div className="fixed top-[373px] right-0 left-0 z-50 mx-auto flex w-full max-w-[430px] items-center justify-center gap-3">
           <label className="bg-grayscale-200 flex h-[42px] w-[180px] items-center justify-between rounded-2xl py-3 pr-3 pl-5">
             <span className="sr-only">검색어</span>
             <input

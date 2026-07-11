@@ -169,7 +169,6 @@ export function LinkCreatePage() {
   return (
     <MobileScreen>
       <header className="sticky top-0 z-30 bg-grayscale-000">
-        <div className="flex h-[60px] items-end px-5 pb-2" aria-hidden="true" />
         <div className="grid h-[50px] grid-cols-[24px_1fr_24px] items-center px-5">
           <span aria-hidden="true" />
           <h1 className="truncate text-center text-[18px] leading-[1.5] font-semibold text-[#1c1c1a]">
@@ -187,7 +186,7 @@ export function LinkCreatePage() {
       </header>
 
       <form
-        className="flex min-h-[calc(100vh-110px)] flex-col px-5 pt-9 pb-[90px]"
+        className="flex min-h-[calc(100vh-50px)] flex-col px-5 pt-9 pb-[90px]"
         onSubmit={(event) => {
           event.preventDefault();
           handleSubmit();
