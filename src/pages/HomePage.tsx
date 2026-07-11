@@ -402,13 +402,11 @@ export function HomePage() {
   };
 
   const handleAllowPushPermission = async (): Promise<void> => {
+    setIsRequestingPushPermission(true);
+    handleClosePushPermissionModal();
+
     try {
-      setIsRequestingPushPermission(true);
       await subscribeToPushNotifications();
-      handleClosePushPermissionModal();
-    } catch {
-      setIsRequestingPushPermission(false);
-      return;
     } finally {
       setIsRequestingPushPermission(false);
     }
