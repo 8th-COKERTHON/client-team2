@@ -1,5 +1,5 @@
 import { env } from "@/lib/env";
-import { getAccessToken } from "@/services/authTokenStorage";
+import { clearAuthTokens, getAccessToken } from "@/services/authTokenStorage";
 
 type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE";
 
@@ -63,6 +63,10 @@ export async function apiClient<TResponse>(
   const responseBody = await parseResponseBody(response);
 
   if (!response.ok) {
+    if (response.status === 401 && options.auth !== false) {
+      clearAuthTokens();
+    }
+
     throw new ApiError(response.status, responseBody);
   }
 
