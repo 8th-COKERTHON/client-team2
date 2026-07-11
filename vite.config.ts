@@ -21,11 +21,11 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
 
-      includeAssets: [
-        "icons/pwa-192x192.png",
-        "icons/pwa-512x512.png",
-        "icons/pwa-maskable-512x512.png",
-      ],
+      devOptions: {
+        enabled: true,
+      },
+
+      includeAssets: ["icon-192.png", "icon-512.png"],
 
       manifest: {
         id: "/",
@@ -44,20 +44,20 @@ export default defineConfig({
 
         icons: [
           {
-            src: "/icons/pwa-192x192.png",
+            src: "icon-192.png",
             sizes: "192x192",
             type: "image/png",
           },
           {
-            src: "/icons/pwa-512x512.png",
+            src: "icon-512.png",
             sizes: "512x512",
             type: "image/png",
           },
           {
-            src: "/icons/pwa-maskable-512x512.png",
+            src: "icon-512.png",
             sizes: "512x512",
             type: "image/png",
-            purpose: "maskable",
+            purpose: "any maskable",
           },
         ],
 
