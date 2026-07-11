@@ -20,6 +20,26 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   return outputArray;
 }
 
+function hasSameApplicationServerKey(
+  subscription: PushSubscription,
+  vapidPublicKey: string,
+): boolean {
+  const currentKey = subscription.options.applicationServerKey;
+
+  if (!currentKey) {
+    return false;
+  }
+
+  const currentKeyArray = new Uint8Array(currentKey);
+  const nextKeyArray = urlBase64ToUint8Array(vapidPublicKey);
+
+  if (currentKeyArray.byteLength !== nextKeyArray.byteLength) {
+    return false;
+  }
+
+  return currentKeyArray.every((value, index) => value === nextKeyArray[index]);
+}
+
 export function canUseWebPush(): boolean {
   return (
     typeof window !== "undefined" &&
@@ -50,13 +70,17 @@ export async function subscribeToPushNotifications(): Promise<PushSubscription |
 
   const registration = await navigator.serviceWorker.ready;
   const existingSubscription = await registration.pushManager.getSubscription();
+  const publicKey = await getVapidPublicKey();
 
   if (existingSubscription) {
-    await savePushSubscription(mapPushSubscriptionToRequest(existingSubscription));
-    return existingSubscription;
+    if (hasSameApplicationServerKey(existingSubscription, publicKey)) {
+      await savePushSubscription(mapPushSubscriptionToRequest(existingSubscription));
+      return existingSubscription;
+    }
+
+    await existingSubscription.unsubscribe();
   }
 
-  const publicKey = await getVapidPublicKey();
   const subscription = await registration.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey: urlBase64ToUint8Array(publicKey),

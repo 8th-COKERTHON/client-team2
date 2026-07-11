@@ -355,6 +355,7 @@ export function HomePage() {
   const [isRequestingPushPermission, setIsRequestingPushPermission] =
     useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const hasRequestedPushSyncRef = useRef(false);
   const fallbackHomeData = useMemo(
     () => mapBookmarksToHomeData(bookmarks),
     [bookmarks],
@@ -387,6 +388,20 @@ export function HomePage() {
 
     searchInputRef.current?.focus();
   }, [isSearchActive]);
+
+  useEffect(() => {
+    if (
+      hasRequestedPushSyncRef.current ||
+      !hasAccessToken ||
+      !canUseWebPush() ||
+      Notification.permission !== "granted"
+    ) {
+      return;
+    }
+
+    hasRequestedPushSyncRef.current = true;
+    void subscribeToPushNotifications();
+  }, [hasAccessToken]);
 
   const handleActivateSearch = (): void => {
     setIsSearchActive(true);
