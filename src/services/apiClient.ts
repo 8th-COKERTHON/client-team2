@@ -1,4 +1,5 @@
 import { env } from "@/lib/env";
+import { dispatchAuthRequiredEvent } from "@/services/authRedirectEvent";
 import { clearAuthTokens, getAccessToken } from "@/services/authTokenStorage";
 
 type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE";
@@ -37,22 +38,47 @@ async function parseResponseBody(response: Response): Promise<unknown> {
   return text || undefined;
 }
 
+function isAccessTokenRequiredError(
+  status: number,
+  responseBody: unknown,
+): boolean {
+  if (status === 401) {
+    return true;
+  }
+
+  if (
+    status === 400 &&
+    typeof responseBody === "object" &&
+    responseBody !== null &&
+    "message" in responseBody &&
+    typeof responseBody.message === "string"
+  ) {
+    return responseBody.message.includes("Access Token");
+  }
+
+  return false;
+}
+
 export async function apiClient<TResponse>(
   path: string,
   options: ApiClientOptions = {},
 ): Promise<TResponse> {
   const headers = new Headers(options.headers);
+  const shouldUseAuth = options.auth !== false;
 
   if (options.body !== undefined) {
     headers.set("Content-Type", "application/json");
   }
 
-  if (options.auth !== false) {
+  if (shouldUseAuth) {
     const accessToken = getAccessToken();
 
-    if (accessToken) {
-      headers.set("Authorization", `Bearer ${accessToken}`);
+    if (!accessToken) {
+      dispatchAuthRequiredEvent();
+      throw new ApiError(401, { message: "Access Token은 필수입니다." });
     }
+
+    headers.set("Authorization", `Bearer ${accessToken}`);
   }
 
   const response = await fetch(`${env.apiBaseUrl}${path}`, {
@@ -63,8 +89,9 @@ export async function apiClient<TResponse>(
   const responseBody = await parseResponseBody(response);
 
   if (!response.ok) {
-    if (response.status === 401 && options.auth !== false) {
+    if (shouldUseAuth && isAccessTokenRequiredError(response.status, responseBody)) {
       clearAuthTokens();
+      dispatchAuthRequiredEvent();
     }
 
     throw new ApiError(response.status, responseBody);

@@ -346,7 +346,7 @@ function doesBookmarkMatchQuery(bookmark: Bookmark, query: string): boolean {
 
 export function HomePage() {
   const [bookmarks] = useState<Bookmark[]>(() => getStoredBookmarks());
-  const { homeData: apiHomeData } = useHome();
+  const { homeData: apiHomeData, error: homeError } = useHome();
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [shouldShowPushPermissionModal, setShouldShowPushPermissionModal] =
@@ -358,6 +358,8 @@ export function HomePage() {
     () => mapBookmarksToHomeData(bookmarks),
     [bookmarks],
   );
+  const hasAccessToken = Boolean(getAccessToken());
+  const shouldShowHomeError = hasAccessToken && Boolean(homeError);
   const homeData = apiHomeData ?? fallbackHomeData;
   const todayArchiveItems = homeData.todayArchive;
   const hasCollections = homeData.collections.length > 0;
@@ -411,6 +413,21 @@ export function HomePage() {
       setIsRequestingPushPermission(false);
     }
   };
+
+  if (shouldShowHomeError) {
+    return (
+      <main className="mx-auto flex min-h-screen w-full max-w-[430px] items-center justify-center bg-grayscale-000 px-5 text-center text-grayscale-900">
+        <div>
+          <h1 className="text-[18px] leading-[1.5] font-semibold text-grayscale-800">
+            홈 정보를 불러오지 못했어요.
+          </h1>
+          <p className="mt-2 text-[14px] leading-[1.5] font-medium text-grayscale-300">
+            잠시 후 다시 시도해 주세요.
+          </p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="bg-grayscale-000 text-grayscale-900 mx-auto min-h-screen w-full max-w-[430px] pb-[140px]">

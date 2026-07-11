@@ -4,9 +4,11 @@ import { GradeSummaryCard } from "@/features/user/components/GradeSummaryCard";
 import { UserStatCards } from "@/features/user/components/UserStatCards";
 import { useUserSummary } from "@/features/user/hooks/useUserSummary";
 import { resolveCurrentGrade } from "@/features/user/utils";
+import { getAccessToken } from "@/services/authTokenStorage";
 
 export function MyPage() {
-  const { userSummary } = useUserSummary();
+  const { userSummary, error } = useUserSummary();
+  const shouldShowError = Boolean(getAccessToken()) && Boolean(error);
   const currentGrade = resolveCurrentGrade(
     userSummary.totalScore,
     userSummary.level,
@@ -23,20 +25,31 @@ export function MyPage() {
         </div>
       </header>
 
-      <div className="flex flex-col gap-3 px-5 pt-[18px] pb-6">
-        <GradeSummaryCard
-          score={userSummary.totalScore}
-          level={userSummary.level}
-        />
+      {shouldShowError ? (
+        <div className="px-5 pt-20 text-center">
+          <h2 className="text-[18px] leading-[1.5] font-semibold text-grayscale-800">
+            마이페이지 정보를 불러오지 못했어요.
+          </h2>
+          <p className="mt-2 text-[14px] leading-[1.5] font-medium text-grayscale-300">
+            잠시 후 다시 시도해 주세요.
+          </p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3 px-5 pt-[18px] pb-6">
+          <GradeSummaryCard
+            score={userSummary.totalScore}
+            level={userSummary.level}
+          />
 
-        <UserStatCards
-          savedBookmarkCount={userSummary.savedBookmarkCount}
-          completedBookmarkCount={userSummary.completedBookmarkCount}
-          totalViewCount={userSummary.totalViewCount}
-        />
+          <UserStatCards
+            savedBookmarkCount={userSummary.savedBookmarkCount}
+            completedBookmarkCount={userSummary.completedBookmarkCount}
+            totalViewCount={userSummary.totalViewCount}
+          />
 
-        <GradeCriteriaList currentGradeKey={currentGrade.key} />
-      </div>
+          <GradeCriteriaList currentGradeKey={currentGrade.key} />
+        </div>
+      )}
     </MobileScreen>
   );
 }
