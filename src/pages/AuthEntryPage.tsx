@@ -10,7 +10,7 @@ export function AuthEntryPage() {
       <section className="flex flex-col items-center pt-[52px]">
         <img src={splashLogo} alt="logo" className="h-[188px] w-[133px]" />
 
-        <h1 className="font-dandan typo-kr-heading-semibold text-main mt-2">
+        <h1 className="font-dandan typo-kr-heading-semibold text-main mt-2 text-4xl">
           적재적소
         </h1>
       </section>

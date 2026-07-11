@@ -17,7 +17,8 @@ import {
 } from "@/services/pushSubscriptionService";
 
 const DEFAULT_PREVIEW_TAGS = ["태그", "태그", "태그"];
-const PUSH_PERMISSION_PROMPT_SESSION_KEY = "remine.pushPermissionPromptDismissed";
+const PUSH_PERMISSION_PROMPT_SESSION_KEY =
+  "remine.pushPermissionPromptDismissed";
 
 function shouldShowPushPermissionPrompt(): boolean {
   if (!canUseWebPush() || Notification.permission !== "default") {
@@ -148,16 +149,16 @@ function ArchiveCard({ archiveItem }: ArchiveCardProps) {
   return (
     <Link
       to={ROUTES.linkDetail(archiveItem.id)}
-      className="flex size-[180px] shrink-0 flex-col justify-between rounded-xl bg-grayscale-white p-4"
+      className="bg-grayscale-white flex size-[180px] shrink-0 flex-col justify-between rounded-xl p-4"
     >
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-0.5">
-          <h2 className="line-clamp-1 text-[18px] leading-[1.5] font-semibold text-grayscale-800">
+          <h2 className="text-grayscale-800 line-clamp-1 text-[18px] leading-[1.5] font-semibold">
             {archiveItem.title}
           </h2>
           <div className="flex items-center gap-1">
             <SiteIcon />
-            <span className="truncate text-[16px] leading-[1.5] font-medium text-grayscale-200">
+            <span className="text-grayscale-200 truncate text-[16px] leading-[1.5] font-medium">
               {archiveItem.domain}
             </span>
           </div>
@@ -170,7 +171,7 @@ function ArchiveCard({ archiveItem }: ArchiveCardProps) {
         </div>
       </div>
 
-      <p className="self-end text-[12px] leading-[1.5] font-medium text-grayscale-100">
+      <p className="text-grayscale-100 self-end text-[12px] leading-[1.5] font-medium">
         {archiveItem.checkedCount}/{archiveItem.totalChecklistCount} 완료
       </p>
     </Link>
@@ -241,12 +242,12 @@ function CollectionCard({ collection }: CollectionCardProps) {
             <div className="flex size-full flex-col justify-between">
               <div className="flex min-w-0 flex-col gap-[8.33px]">
                 <div className="flex min-w-0 flex-col gap-[1.39px]">
-                  <p className="line-clamp-1 text-[12.5px] leading-[1.5] font-semibold tracking-[-0.31px] text-grayscale-800">
+                  <p className="text-grayscale-800 line-clamp-1 text-[12.5px] leading-[1.5] font-semibold tracking-[-0.31px]">
                     링크 제목
                   </p>
                   <div className="flex min-w-0 items-center gap-[2.78px]">
                     <SiteIcon className="size-[13.89px] shrink-0" />
-                    <span className="truncate text-[11.11px] leading-[1.5] font-medium tracking-[-0.28px] text-grayscale-200">
+                    <span className="text-grayscale-200 truncate text-[11.11px] leading-[1.5] font-medium tracking-[-0.28px]">
                       google.com
                     </span>
                   </div>
@@ -262,7 +263,7 @@ function CollectionCard({ collection }: CollectionCardProps) {
                 </div>
               </div>
 
-              <div className="flex justify-between text-[8.33px] leading-[1.5] font-medium tracking-[-0.21px] text-grayscale-100">
+              <div className="text-grayscale-100 flex justify-between text-[8.33px] leading-[1.5] font-medium tracking-[-0.21px]">
                 <span>0/2 완료</span>
                 <span>2025/02/02</span>
               </div>
@@ -278,10 +279,10 @@ function CollectionCard({ collection }: CollectionCardProps) {
       </div>
 
       <div className="flex items-center gap-1">
-        <p className="text-[14px] leading-[1.5] font-semibold text-grayscale-800">
+        <p className="text-grayscale-800 text-[14px] leading-[1.5] font-semibold">
           {collection.tagName}
         </p>
-        <span className="flex size-5 items-center justify-center rounded-full bg-grayscale-100 text-[12px] leading-[1.5] font-medium text-grayscale-000">
+        <span className="bg-grayscale-100 text-grayscale-000 flex size-5 items-center justify-center rounded-full text-[12px] leading-[1.5] font-medium">
           {collection.bookmarkCount}
         </span>
       </div>
@@ -317,7 +318,7 @@ function TodayArchiveCompleteState() {
         alt=""
         className="h-[157px] w-[111px] object-contain"
       />
-      <p className="whitespace-nowrap text-[14px] leading-[1.5] font-semibold tracking-[-0.35px] text-grayscale-300">
+      <p className="text-grayscale-300 text-[14px] leading-[1.5] font-semibold tracking-[-0.35px] whitespace-nowrap">
         오늘 추천 할 일을 완료했어요.
       </p>
     </div>
@@ -414,12 +415,12 @@ export function HomePage() {
 
   if (shouldShowHomeError) {
     return (
-      <main className="mx-auto flex min-h-screen w-full max-w-[430px] items-center justify-center bg-grayscale-000 px-5 text-center text-grayscale-900">
+      <main className="bg-grayscale-000 text-grayscale-900 mx-auto flex min-h-screen w-full max-w-[430px] items-center justify-center px-5 text-center">
         <div>
-          <h1 className="text-[18px] leading-[1.5] font-semibold text-grayscale-800">
+          <h1 className="text-grayscale-800 text-[18px] leading-[1.5] font-semibold">
             홈 정보를 불러오지 못했어요.
           </h1>
-          <p className="mt-2 text-[14px] leading-[1.5] font-medium text-grayscale-300">
+          <p className="text-grayscale-300 mt-2 text-[14px] leading-[1.5] font-medium">
             잠시 후 다시 시도해 주세요.
           </p>
         </div>
@@ -432,7 +433,7 @@ export function HomePage() {
       <header className="bg-grayscale-000 fixed top-0 right-0 left-0 z-40 mx-auto w-full max-w-[430px] px-5 pt-[60px]">
         <div className="flex h-[50px] items-center justify-between">
           <div>
-            <p className="relative text-[40px] leading-[1.5] font-normal text-main">
+            <p className="font-hakgyo text-main relative text-[40px] leading-[1.5]">
               {homeData.totalScore}점
               <ScoreUnderline />
             </p>
@@ -494,59 +495,59 @@ export function HomePage() {
         </div>
       ) : (
         <div className="pt-[122px]">
-        <section className="overflow-hidden">
-          <div className="px-5">
-            <h1 className="font-poppins text-[16px] leading-[1.5] font-semibold text-black">
-              Today’s Archive
-            </h1>
-          </div>
-          {hasCompletedTodayArchive ? (
-            <TodayArchiveCompleteState />
-          ) : todayArchiveItems.length > 0 ? (
-            <div className="mt-[15px] flex gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {todayArchiveItems.map((bookmark) => (
-                <ArchiveCard key={bookmark.id} archiveItem={bookmark} />
-              ))}
+          <section className="overflow-hidden">
+            <div className="px-5">
+              <h1 className="font-poppins text-[16px] leading-[1.5] font-semibold text-black">
+                Today’s Archive
+              </h1>
             </div>
-          ) : (
-            <EmptyState
-              message="추천 할 일이 없어요."
-              className="mx-5 mt-[15px] h-[180px]"
-            />
-          )}
-        </section>
+            {hasCompletedTodayArchive ? (
+              <TodayArchiveCompleteState />
+            ) : todayArchiveItems.length > 0 ? (
+              <div className="mt-[15px] flex [scrollbar-width:none] gap-3 overflow-x-auto px-5 pb-1 [&::-webkit-scrollbar]:hidden">
+                {todayArchiveItems.map((bookmark) => (
+                  <ArchiveCard key={bookmark.id} archiveItem={bookmark} />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                message="추천 할 일이 없어요."
+                className="mx-5 mt-[15px] h-[180px]"
+              />
+            )}
+          </section>
 
-        <section className="mt-5 px-5">
-          <div className="flex items-center justify-between">
-            <h2 className="font-poppins text-[16px] leading-[1.5] font-semibold text-black">
-              Collections
-            </h2>
-            <button
-              type="button"
-              className="flex size-6 items-center justify-center text-grayscale-800"
-              aria-label="컬렉션 더보기"
-            >
-              <ArrowRightIcon />
-            </button>
-          </div>
-
-          {hasCollections ? (
-            <div className="mt-[15px] grid grid-cols-2 gap-x-[15px] gap-y-[15px]">
-              {homeData.collections.map((collection) => (
-                <CollectionCard
-                  key={collection.tagName}
-                  collection={collection}
-                />
-              ))}
+          <section className="mt-5 px-5">
+            <div className="flex items-center justify-between">
+              <h2 className="font-poppins text-[16px] leading-[1.5] font-semibold text-black">
+                Collections
+              </h2>
+              <button
+                type="button"
+                className="text-grayscale-800 flex size-6 items-center justify-center"
+                aria-label="컬렉션 더보기"
+              >
+                <ArrowRightIcon />
+              </button>
             </div>
-          ) : (
-            <EmptyState
-              message="북마크한 링크가 없어요."
-              className="mt-[15px] h-[308px]"
-            />
-          )}
-        </section>
-      </div>
+
+            {hasCollections ? (
+              <div className="mt-[15px] grid grid-cols-2 gap-x-[15px] gap-y-[15px]">
+                {homeData.collections.map((collection) => (
+                  <CollectionCard
+                    key={collection.tagName}
+                    collection={collection}
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                message="북마크한 링크가 없어요."
+                className="mt-[15px] h-[308px]"
+              />
+            )}
+          </section>
+        </div>
       )}
 
       {isSearchActive ? (
