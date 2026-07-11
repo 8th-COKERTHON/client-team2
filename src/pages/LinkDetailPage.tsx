@@ -154,6 +154,10 @@ export function LinkDetailPage() {
   );
   const [draftTitle, setDraftTitle] = useState("");
   const [isEditingChecklist, setIsEditingChecklist] = useState(false);
+  const [pendingChecklistIds, setPendingChecklistIds] = useState<Set<string>>(
+    () => new Set(),
+  );
+  const [checklistErrorMessage, setChecklistErrorMessage] = useState("");
   const [showEditSuccessToast, setShowEditSuccessToast] = useState(
     () => Boolean(locationState?.shouldShowEditSuccessToast),
   );
@@ -259,9 +263,23 @@ export function LinkDetailPage() {
   }
 
   const handleToggleChecklistItem = (itemId: string): void => {
+    if (pendingChecklistIds.has(itemId)) {
+      return;
+    }
+
+    const targetItem = checklist.find((item) => item.id === itemId);
+
+    if (!targetItem) {
+      return;
+    }
+
+    const previousIsCompleted = targetItem.isCompleted;
+    const nextIsCompleted = !previousIsCompleted;
+
+    setChecklistErrorMessage("");
     setChecklist((current) => {
       const nextChecklist = current.map((item) =>
-        item.id === itemId ? { ...item, isCompleted: !item.isCompleted } : item,
+        item.id === itemId ? { ...item, isCompleted: nextIsCompleted } : item,
       );
 
       if (bookmark && !isServerId(bookmark.id)) {
@@ -272,15 +290,37 @@ export function LinkDetailPage() {
     });
 
     if (isServerId(bookmark.id) && isServerId(itemId)) {
-      void toggleChecklist(bookmark.id, itemId).catch(() => {
-        setChecklist((current) =>
-          current.map((item) =>
-            item.id === itemId
-              ? { ...item, isCompleted: !item.isCompleted }
-              : item,
-          ),
-        );
-      });
+      setPendingChecklistIds((current) => new Set(current).add(itemId));
+
+      void toggleChecklist(bookmark.id, itemId)
+        .then((updatedChecklist) => {
+          setChecklist((current) =>
+            current.map((item) =>
+              item.id === itemId
+                ? { ...item, isCompleted: updatedChecklist.isChecked }
+                : item,
+            ),
+          );
+        })
+        .catch(() => {
+          setChecklist((current) =>
+            current.map((item) =>
+              item.id === itemId
+                ? { ...item, isCompleted: previousIsCompleted }
+                : item,
+            ),
+          );
+          setChecklistErrorMessage(
+            "체크 상태를 변경하지 못했어요. 잠시 후 다시 시도해 주세요.",
+          );
+        })
+        .finally(() => {
+          setPendingChecklistIds((current) => {
+            const nextPendingIds = new Set(current);
+            nextPendingIds.delete(itemId);
+            return nextPendingIds;
+          });
+        });
     }
   };
 
@@ -290,6 +330,8 @@ export function LinkDetailPage() {
     if (!title || !canAddChecklist) {
       return;
     }
+
+    setChecklistErrorMessage("");
 
     const newChecklistItem: ChecklistItem = {
       id: `local-${Date.now()}`,
@@ -330,6 +372,9 @@ export function LinkDetailPage() {
           setChecklist((current) =>
             current.filter((item) => item.id !== newChecklistItem.id),
           );
+          setChecklistErrorMessage(
+            "체크리스트 항목을 추가하지 못했어요. 잠시 후 다시 시도해 주세요.",
+          );
         });
     }
   };
@@ -345,36 +390,41 @@ export function LinkDetailPage() {
     handleAddChecklistItem();
   };
 
-  const renderChecklistItem = (item: ChecklistItem, index: number) => (
-    <li
-      key={item.id}
-      className="relative flex min-h-[30px] items-center justify-between text-[16px] leading-[1.5] font-medium"
-    >
-      <button
-        type="button"
-        onClick={() => handleToggleChecklistItem(item.id)}
-        className="relative min-w-0 flex-1 text-left text-[#1c1c1a]"
+  const renderChecklistItem = (item: ChecklistItem, index: number) => {
+    const isPending = pendingChecklistIds.has(item.id);
+
+    return (
+      <li
+        key={item.id}
+        className="relative flex min-h-[30px] items-center justify-between text-[16px] leading-[1.5] font-medium"
       >
-        <span className="relative mr-1 inline-flex min-w-5 justify-center">
-          {item.isCompleted && !isEditingChecklist ? (
-            <ChecklistNumberMark />
-          ) : null}
-          <span className="relative">{index + 1}.</span>
-        </span>
-        <span className="relative inline-block">
-          {item.title}
-          {item.isCompleted && !isEditingChecklist ? (
-            <ChecklistTextUnderline />
-          ) : null}
-        </span>
-      </button>
-      {item.isCompleted && !isEditingChecklist ? (
-        <span className="ml-3 shrink-0 text-[20px] leading-[1.5] font-normal tracking-[-0.6px] text-main">
-          {CHECKLIST_SCORE_REWARD}점
-        </span>
-      ) : null}
-    </li>
-  );
+        <button
+          type="button"
+          onClick={() => handleToggleChecklistItem(item.id)}
+          disabled={isPending}
+          className="relative min-w-0 flex-1 text-left text-[#1c1c1a] disabled:opacity-60"
+        >
+          <span className="relative mr-1 inline-flex min-w-5 justify-center">
+            {item.isCompleted && !isEditingChecklist ? (
+              <ChecklistNumberMark />
+            ) : null}
+            <span className="relative">{index + 1}.</span>
+          </span>
+          <span className="relative inline-block">
+            {item.title}
+            {item.isCompleted && !isEditingChecklist ? (
+              <ChecklistTextUnderline />
+            ) : null}
+          </span>
+        </button>
+        {item.isCompleted && !isEditingChecklist ? (
+          <span className="ml-3 shrink-0 text-[20px] leading-[1.5] font-normal tracking-[-0.6px] text-main">
+            {CHECKLIST_SCORE_REWARD}점
+          </span>
+        ) : null}
+      </li>
+    );
+  };
 
   return (
     <MobileScreen>
@@ -469,6 +519,16 @@ export function LinkDetailPage() {
           <ol className="mt-2.5 flex flex-col gap-2">
             {checklist.map(renderChecklistItem)}
           </ol>
+
+          {checklistErrorMessage ? (
+            <p
+              className="mt-2 text-[12px] leading-[1.5] font-medium text-error"
+              role="alert"
+              aria-live="polite"
+            >
+              {checklistErrorMessage}
+            </p>
+          ) : null}
 
           {isEditingChecklist && canAddChecklist ? (
             <div className="mt-2 flex items-center gap-2 pl-6">
