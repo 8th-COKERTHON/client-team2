@@ -8,9 +8,30 @@ import type { HomeArchiveItem, HomeCollection } from "@/features/home/types";
 import { mapBookmarksToHomeData } from "@/features/home/utils";
 import { getStoredBookmarks } from "@/features/link/api/localBookmarkStorage";
 import type { Bookmark } from "@/features/link/types";
+import { PushPermissionModal } from "@/features/notification/components/PushPermissionModal";
 import { ScoreUnderline } from "@/features/user/components/GradeSummaryCard";
+import { getAccessToken } from "@/services/authTokenStorage";
+import {
+  canUseWebPush,
+  subscribeToPushNotifications,
+} from "@/services/pushSubscriptionService";
 
 const DEFAULT_PREVIEW_TAGS = ["태그", "태그", "태그"];
+const PUSH_PERMISSION_PROMPT_SESSION_KEY = "remine.pushPermissionPromptDismissed";
+
+function shouldShowPushPermissionPrompt(): boolean {
+  if (!canUseWebPush() || Notification.permission !== "default") {
+    return false;
+  }
+
+  if (!getAccessToken()) {
+    return false;
+  }
+
+  return (
+    window.sessionStorage.getItem(PUSH_PERMISSION_PROMPT_SESSION_KEY) !== "true"
+  );
+}
 
 function SearchIcon() {
   return (
@@ -328,8 +349,15 @@ export function HomePage() {
   const { homeData: apiHomeData } = useHome();
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [shouldShowPushPermissionModal, setShouldShowPushPermissionModal] =
+    useState(() => shouldShowPushPermissionPrompt());
+  const [isRequestingPushPermission, setIsRequestingPushPermission] =
+    useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const fallbackHomeData = useMemo(() => mapBookmarksToHomeData(bookmarks), [bookmarks]);
+  const fallbackHomeData = useMemo(
+    () => mapBookmarksToHomeData(bookmarks),
+    [bookmarks],
+  );
   const homeData = apiHomeData ?? fallbackHomeData;
   const todayArchiveItems = homeData.todayArchive;
   const hasCollections = homeData.collections.length > 0;
@@ -364,6 +392,24 @@ export function HomePage() {
   const handleCloseSearch = (): void => {
     setIsSearchActive(false);
     setSearchQuery("");
+  };
+
+  const handleClosePushPermissionModal = (): void => {
+    window.sessionStorage.setItem(PUSH_PERMISSION_PROMPT_SESSION_KEY, "true");
+    setShouldShowPushPermissionModal(false);
+  };
+
+  const handleAllowPushPermission = async (): Promise<void> => {
+    try {
+      setIsRequestingPushPermission(true);
+      await subscribeToPushNotifications();
+      handleClosePushPermissionModal();
+    } catch {
+      setIsRequestingPushPermission(false);
+      return;
+    } finally {
+      setIsRequestingPushPermission(false);
+    }
   };
 
   return (
@@ -517,6 +563,16 @@ export function HomePage() {
             <CloseIcon />
           </button>
         </div>
+      ) : null}
+
+      {shouldShowPushPermissionModal ? (
+        <PushPermissionModal
+          isSubmitting={isRequestingPushPermission}
+          onAllow={() => {
+            void handleAllowPushPermission();
+          }}
+          onLater={handleClosePushPermissionModal}
+        />
       ) : null}
     </main>
   );
