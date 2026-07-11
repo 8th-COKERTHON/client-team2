@@ -20,7 +20,7 @@ export function SplashPage() {
       <div className="bg-grayscale-background relative mx-auto flex min-h-dvh w-full max-w-[375px] flex-col items-center px-5 pt-[162px] pb-[56px]">
         <img src={splashLogo} alt="logo" className="h-[188px] w-[133px]" />
 
-        <h1 className="font-dandan typo-kr-heading-semibold text-main mt-2">
+        <h1 className="font-dandan typo-kr-heading-semibold text-main mt-2 text-4xl">
           적재적소
         </h1>
 
