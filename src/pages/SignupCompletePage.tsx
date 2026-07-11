@@ -1,7 +1,23 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router";
+
+import { ROUTES } from "@/constants/routes";
 import { AuthLayout } from "@/features/auth/components/AuthLayout";
 import completedLogo from "@/assets/icons/character_auth_completed.png";
 
+const AUTO_NAVIGATE_DELAY_MS = 2000;
+
 export function SignupCompletePage() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigate(ROUTES.login);
+    }, AUTO_NAVIGATE_DELAY_MS);
+
+    return () => clearTimeout(timer);
+  }, [navigate]);
+
   return (
     <AuthLayout>
       <section className="flex min-h-[560px] flex-col items-center justify-center text-center">
