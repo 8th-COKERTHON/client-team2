@@ -6,7 +6,10 @@ import { AppTopBar } from "@/components/ui/AppTopBar";
 import { MobileScreen } from "@/components/ui/MobileScreen";
 import { ROUTES } from "@/constants/routes";
 import { getBookmarkDetail } from "@/features/link/api/bookmarkApi";
-import { createChecklist, toggleChecklist } from "@/features/link/api/checklistApi";
+import {
+  createChecklist,
+  toggleChecklist,
+} from "@/features/link/api/checklistApi";
 import {
   getStoredBookmark,
   updateStoredBookmarkChecklist,
@@ -25,7 +28,11 @@ const CHECKLIST_SCORE_REWARD = 4;
 
 function CalendarIcon() {
   return (
-    <svg viewBox="0 0 16 16" className="size-4 text-grayscale-100" aria-hidden="true">
+    <svg
+      viewBox="0 0 16 16"
+      className="text-grayscale-100 size-4"
+      aria-hidden="true"
+    >
       <path
         d="M4.5 2v2M11.5 2v2M3 6h10M3.5 3.5h9A1.5 1.5 0 0 1 14 5v7.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12.5V5a1.5 1.5 0 0 1 1.5-1.5Z"
         fill="none"
@@ -96,7 +103,7 @@ function ChecklistNumberMark() {
   return (
     <svg
       viewBox="0 0 38 37"
-      className="pointer-events-none absolute top-1/2 left-1/2 size-[38px] -translate-x-1/2 -translate-y-1/2 text-main"
+      className="text-main pointer-events-none absolute top-1/2 left-1/2 size-[38px] -translate-x-1/2 -translate-y-1/2"
       aria-hidden="true"
     >
       <path
@@ -116,7 +123,7 @@ function ChecklistTextUnderline() {
     <svg
       viewBox="0 0 110 8"
       preserveAspectRatio="none"
-      className="pointer-events-none absolute right-0 bottom-[6px] left-0 h-2 text-main"
+      className="text-main pointer-events-none absolute right-0 bottom-[6px] left-0 h-2"
       aria-hidden="true"
     >
       <path
@@ -158,8 +165,8 @@ export function LinkDetailPage() {
     () => new Set(),
   );
   const [checklistErrorMessage, setChecklistErrorMessage] = useState("");
-  const [showEditSuccessToast, setShowEditSuccessToast] = useState(
-    () => Boolean(locationState?.shouldShowEditSuccessToast),
+  const [showEditSuccessToast, setShowEditSuccessToast] = useState(() =>
+    Boolean(locationState?.shouldShowEditSuccessToast),
   );
   const completedCount = useMemo(
     () => checklist.filter((item) => item.isCompleted).length,
@@ -253,7 +260,7 @@ export function LinkDetailPage() {
           </p>
           <Link
             to={ROUTES.home}
-            className="mt-5 inline-flex rounded-xl bg-main px-5 py-3 text-grayscale-white"
+            className="bg-main text-grayscale-white mt-5 inline-flex rounded-xl px-5 py-3"
           >
             홈으로 이동
           </Link>
@@ -340,10 +347,7 @@ export function LinkDetailPage() {
     };
 
     setChecklist((current) => {
-      const nextChecklist = [
-        ...current,
-        newChecklistItem,
-      ];
+      const nextChecklist = [...current, newChecklistItem];
 
       if (bookmark && !isServerId(bookmark.id)) {
         updateStoredBookmarkChecklist(bookmark.id, nextChecklist);
@@ -418,7 +422,7 @@ export function LinkDetailPage() {
           </span>
         </button>
         {item.isCompleted && !isEditingChecklist ? (
-          <span className="ml-3 shrink-0 text-[20px] leading-[1.5] font-normal tracking-[-0.6px] text-main">
+          <span className="font-hakgyo text-main ml-3 shrink-0 text-[20px] leading-[1.5] font-normal tracking-[-0.6px]">
             {CHECKLIST_SCORE_REWARD}점
           </span>
         ) : null}
@@ -433,7 +437,7 @@ export function LinkDetailPage() {
         rightSlot={
           <Link
             to={ROUTES.linkEdit(bookmark.id)}
-            className="flex size-6 items-center justify-center text-grayscale-200"
+            className="text-grayscale-200 flex size-6 items-center justify-center"
             aria-label="링크 수정"
           >
             <PencilIcon />
@@ -443,7 +447,7 @@ export function LinkDetailPage() {
 
       <section className="px-5 pt-[13px]">
         <div className="relative h-[71px]">
-          <p className="absolute top-0 left-0 text-[40px] leading-[1.5] font-normal text-main">
+          <p className="font-hakgyo text-main absolute top-0 left-0 text-[40px] leading-[1.5] font-normal">
             {bookmark.score}점
             <ScoreUnderline />
           </p>
@@ -451,15 +455,15 @@ export function LinkDetailPage() {
       </section>
 
       <section className="mt-5 px-5">
-        <div className="rounded-xl bg-grayscale-white p-4">
+        <div className="bg-grayscale-white rounded-xl p-4">
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between">
-              <p className="text-[16px] leading-[1.5] font-medium text-grayscale-200">
+              <p className="text-grayscale-200 text-[16px] leading-[1.5] font-medium">
                 저장 목적
               </p>
               <div className="flex items-center gap-1">
                 <CalendarIcon />
-                <time className="text-[12px] leading-[1.5] font-medium text-grayscale-100">
+                <time className="text-grayscale-100 text-[12px] leading-[1.5] font-medium">
                   {bookmark.reminderAt}
                 </time>
               </div>
@@ -478,27 +482,27 @@ export function LinkDetailPage() {
       </section>
 
       <section className="mt-3 px-5">
-        <p className="mb-1 text-[16px] leading-[1.5] font-medium text-grayscale-300">
+        <p className="text-grayscale-300 mb-1 text-[16px] leading-[1.5] font-medium">
           링크 URL
         </p>
         <a
           href={bookmark.url}
           target="_blank"
           rel="noreferrer"
-          className="block h-12 overflow-hidden rounded-xl bg-grayscale-050 px-5 py-[13px] text-[14px] leading-[1.5] font-medium text-main underline"
+          className="bg-grayscale-050 text-main block h-12 overflow-hidden rounded-xl px-5 py-[13px] text-[14px] leading-[1.5] font-medium underline"
         >
           <span className="block truncate">{bookmark.url}</span>
         </a>
       </section>
 
       <section className="mt-4 px-5 pb-6">
-        <div className="rounded-xl bg-grayscale-white p-4">
+        <div className="bg-grayscale-white rounded-xl p-4">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">
-              <h2 className="text-[16px] leading-[1.5] font-medium text-grayscale-200">
+              <h2 className="text-grayscale-200 text-[16px] leading-[1.5] font-medium">
                 체크리스트
               </h2>
-              <p className="text-[12px] leading-[1.5] font-medium text-grayscale-100">
+              <p className="text-grayscale-100 text-[12px] leading-[1.5] font-medium">
                 {completedCount}/{checklist.length}
               </p>
             </div>
@@ -522,7 +526,7 @@ export function LinkDetailPage() {
 
           {checklistErrorMessage ? (
             <p
-              className="mt-2 text-[12px] leading-[1.5] font-medium text-error"
+              className="text-error mt-2 text-[12px] leading-[1.5] font-medium"
               role="alert"
               aria-live="polite"
             >
@@ -537,14 +541,14 @@ export function LinkDetailPage() {
                 onChange={(event) => setDraftTitle(event.target.value)}
                 onKeyDown={handleAddChecklistFromEnter}
                 placeholder="새 항목 추가 (최대 5개)"
-                className="min-w-0 flex-1 bg-transparent text-[16px] leading-[1.5] font-medium text-grayscale-200 outline-none placeholder:text-grayscale-200"
+                className="text-grayscale-200 placeholder:text-grayscale-200 min-w-0 flex-1 bg-transparent text-[16px] leading-[1.5] font-medium outline-none"
                 aria-label="새 체크리스트 항목"
               />
               <button
                 type="button"
                 onClick={handleAddChecklistItem}
                 disabled={!draftTitle.trim()}
-                className="flex size-6 shrink-0 items-center justify-center rounded-full bg-main-100 text-main disabled:text-grayscale-100"
+                className="bg-main-100 text-main disabled:text-grayscale-100 flex size-6 shrink-0 items-center justify-center rounded-full"
                 aria-label="체크리스트 항목 추가"
               >
                 <AddIcon />
